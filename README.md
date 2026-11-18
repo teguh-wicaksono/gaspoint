@@ -1,2 +1,2 @@
 # gaspoint
-PTT
+Ayo digarap, ojok mangkrak
