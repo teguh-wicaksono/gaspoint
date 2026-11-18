@@ -20,6 +20,16 @@ class DashboardController extends Controller
             return redirect()->route('login');
         }
 
+        $user = Auth::user();
+
+        if ($user->role === 'pembeli') {
+            return view('dashboard-pembeli');
+        }
+
+        if ($user->role === 'kurir') {
+            return view('dashboard-kurir');
+        }
+
         return view('dashboard', $this->getDashboardData());
     }
 
