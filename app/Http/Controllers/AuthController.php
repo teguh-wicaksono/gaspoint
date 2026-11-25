@@ -12,12 +12,16 @@ use Illuminate\Support\Facades\Validator;
 class AuthController extends Controller
 {
     // Tampilkan form login (HANYA untuk pengelola)
-    public function showLogin()
+    public function showLogin(Request $request)
     {
         if (Auth::check()) {
             return redirect()->route('dashboard');
         }
-        return view('auth.login');
+
+        // ?sebagai=kasir dikirim dari landing page "Masuk sebagai Kasir"
+        $sebagai = $request->query('sebagai') === User::ROLE_KASIR ? User::ROLE_KASIR : null;
+
+        return view('auth.login', compact('sebagai'));
     }
 
     // Proses login (HANYA untuk pengelola)
@@ -41,6 +45,12 @@ class AuthController extends Controller
         $credentials = $request->only('email', 'password');
         $remember = $request->has('remember');
 
+        // Pintu masuk kasir: hanya akun dengan role kasir yang boleh lewat.
+        $sebagai = $request->input('sebagai') === User::ROLE_KASIR ? User::ROLE_KASIR : null;
+        if ($sebagai) {
+            $credentials['role'] = User::ROLE_KASIR;
+        }
+
         if (Auth::attempt($credentials, $remember)) {
             $request->session()->regenerate();
             
@@ -49,7 +59,9 @@ class AuthController extends Controller
         }
 
         return back()->withErrors([
-            'email' => 'Email atau password salah.',
+            'email' => $sebagai
+                ? 'Email atau password salah, atau akun ini bukan akun kasir.'
+                : 'Email atau password salah.',
         ])->withInput($request->except('password'));
     }
 
@@ -90,6 +102,9 @@ class AuthController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            // Daftar mandiri = kasir. Role pengelola/kurir hanya bisa diberikan
+            // oleh pengelola lewat menu Kelola Pengguna.
+            'role' => User::ROLE_KASIR,
         ]);
 
         Auth::login($user);

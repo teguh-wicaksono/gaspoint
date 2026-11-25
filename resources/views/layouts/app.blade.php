@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="id" dir="ltr">
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -365,6 +364,16 @@
                 </a>
             </li>
 
+            <li class="nav-title">Transaksi</li>
+
+            <!-- Pesanan Kasir -->
+            <li class="nav-item">
+                <a class="nav-link {{ Request::routeIs('pesanan.*') ? 'active' : '' }}"
+                   href="{{ route('pesanan.index') }}">
+                    <i class="nav-icon fas fa-cash-register me-2"></i><span class="nav-label">Pesanan Kasir</span>
+                </a>
+            </li>
+
             <li class="nav-title">Inventory</li>
 
             <!-- Barang -->
@@ -436,6 +445,18 @@
                 </ul>
             </li>
 
+            @if(Auth::check() && Auth::user()->role === \App\Models\User::ROLE_PENGELOLA)
+                <li class="nav-title">Pengaturan</li>
+
+                <!-- Kelola Pengguna -->
+                <li class="nav-item">
+                    <a class="nav-link {{ Request::routeIs('pengguna.*') ? 'active' : '' }}"
+                       href="{{ route('pengguna.index') }}">
+                        <i class="nav-icon fas fa-users me-2"></i><span class="nav-label">Kelola Pengguna</span>
+                    </a>
+                </li>
+            @endif
+
         </ul>
 
         <button class="sidebar-toggler" type="button" onclick="toggleSidebar()" aria-label="Minimize navigation" title="Minimize navigation">
@@ -457,7 +478,8 @@
                     
                     <!-- User Dropdown -->
                     @auth
-                    <div class="dropdown ms-auto">
+                    <div class="ms-auto d-flex align-items-center gap-2">
+                    <div class="dropdown">
                         <button class="btn btn-link text-dark dropdown-toggle d-flex align-items-center" 
                                 type="button" 
                                 data-coreui-toggle="dropdown" 
@@ -473,7 +495,7 @@
                             </li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
-                                <form method="POST" action="{{ route('logout') }}" id="logout-form">
+                                <form method="POST" action="{{ route('logout') }}" class="logout-form">
                                     @csrf
                                     <button type="submit" class="dropdown-item text-danger">
                                         <i class="fas fa-sign-out-alt me-2"></i> Logout
@@ -481,6 +503,17 @@
                                 </form>
                             </li>
                         </ul>
+                    </div>
+
+                    <!-- Tombol Logout (selalu terlihat di semua halaman) -->
+                    <form method="POST" action="{{ route('logout') }}" class="logout-form">
+                        @csrf
+                        <button type="submit" class="btn btn-outline-danger btn-sm d-flex align-items-center"
+                                title="Logout" aria-label="Logout">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span class="d-none d-sm-inline ms-2">Logout</span>
+                        </button>
+                    </form>
                     </div>
                     @endauth
                 </div>
@@ -495,7 +528,11 @@
                                 <i class="fas fa-home"></i>
                             </a>
                         </li>
-                        @yield('breadcrumb-items', '<li class="breadcrumb-item active">' . (isset($breadcrumb) ? $breadcrumb : 'Dashboard') . '</li>')
+                        @hasSection('breadcrumb-items')
+                            @yield('breadcrumb-items')
+                        @else
+                            <li class="breadcrumb-item active">{{ $breadcrumb ?? 'Dashboard' }}</li>
+                        @endif
                     </ol>
                 </nav>
             </div>
@@ -646,14 +683,13 @@
             });
             
             // Handle logout confirmation
-            const logoutForm = document.getElementById('logout-form');
-            if (logoutForm) {
+            document.querySelectorAll('.logout-form').forEach(function(logoutForm) {
                 logoutForm.addEventListener('submit', function(e) {
                     if (!confirm('Apakah Anda yakin ingin logout?')) {
                         e.preventDefault();
                     }
                 });
-            }
+            });
             
             const sidebar = document.getElementById('sidebar');
             const savedState = localStorage.getItem('sidebarState');

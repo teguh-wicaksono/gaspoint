@@ -3,9 +3,11 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BarangController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\PesananController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StokKeluarController;
 use App\Http\Controllers\StokMasukController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 // Public: landing page portal pengelola
@@ -40,6 +42,15 @@ Route::middleware('auth')->group(function () {
         Route::get('/api/data', 'getBarangData')->name('api.data');
     });
 
+    Route::prefix('pesanan')->name('pesanan.')->controller(PesananController::class)->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('/create', 'create')->name('create');
+        Route::post('/', 'store')->name('store');
+        Route::get('/{pesanan}', 'show')->name('show');
+        Route::post('/{pesanan}/status', 'updateStatus')->name('status');
+        Route::delete('/{pesanan}', 'destroy')->name('destroy');
+    });
+
     Route::prefix('stok-masuk')->name('stok.masuk.')->controller(StokMasukController::class)->group(function () {
         Route::get('/', 'index')->name('index');
         Route::get('/create', 'create')->name('create');
@@ -56,6 +67,16 @@ Route::middleware('auth')->group(function () {
         Route::get('/{stok_keluar}/edit', 'edit')->name('edit');
         Route::put('/{stok_keluar}', 'update')->name('update');
         Route::delete('/{stok_keluar}', 'destroy')->name('destroy');
+    });
+
+    // Kelola Pengguna - khusus pengelola
+    Route::middleware('role:pengelola')->prefix('pengguna')->name('pengguna.')->controller(UserController::class)->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('/create', 'create')->name('create');
+        Route::post('/', 'store')->name('store');
+        Route::get('/{user}/edit', 'edit')->name('edit');
+        Route::put('/{user}', 'update')->name('update');
+        Route::delete('/{user}', 'destroy')->name('destroy');
     });
 
     Route::prefix('profile')->name('profile.')->controller(ProfileController::class)->group(function () {
