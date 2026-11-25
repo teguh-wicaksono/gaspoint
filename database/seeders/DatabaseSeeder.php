@@ -14,6 +14,7 @@ class DatabaseSeeder extends Seeder
             'name' => 'Admin Rumah Gas',
             'email' => 'admin@rumahgas.test',
             'password' => 'password123',
+            'role' => User::ROLE_PENGELOLA,
         ]);
 
         Barang::create(['nama_barang' => 'Gas LPG 3 kg', 'jenis' => 'gas', 'harga' => 22000, 'stok' => 50]);

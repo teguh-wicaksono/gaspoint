@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal Pengelola - Rumah Gas dan Galon</title>
+    <title>Masuk - Rumah Gas dan Galon</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
@@ -93,7 +93,7 @@
             color: white;
         }
         
-        .icon-pembeli {
+        .icon-kasir {
             background: linear-gradient(135deg, var(--success-color) 0%, #17a673 100%);
         }
         
@@ -101,7 +101,7 @@
             background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
         }
         
-        .btn-pembeli {
+        .btn-kasir {
             background: var(--success-color);
             border: none;
             padding: 12px 30px;
@@ -111,7 +111,7 @@
             color: white;
         }
         
-        .btn-pembeli:hover {
+        .btn-kasir:hover {
             background: #17a673;
             transform: scale(1.05);
             color: white;
@@ -305,13 +305,74 @@
 
     <!-- Main Content -->
     <div class="container">
+        @if(session('status'))
+            <div class="alert alert-info alert-dismissible fade show mb-4" role="alert">
+                <i class="bi bi-info-circle-fill me-2"></i>{{ session('status') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+
+        @auth
+            <div class="alert alert-success d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4" role="alert">
+                <div>
+                    <i class="bi bi-person-check-fill me-2"></i>
+                    Anda masuk sebagai <strong>{{ auth()->user()->name }}</strong> ({{ auth()->user()->role_label }})
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="{{ route('dashboard') }}" class="btn btn-success btn-sm">
+                        <i class="bi bi-speedometer2 me-1"></i>Ke Dashboard
+                    </a>
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" class="btn btn-outline-danger btn-sm">
+                            <i class="bi bi-box-arrow-right me-1"></i>Logout
+                        </button>
+                    </form>
+                </div>
+            </div>
+        @endauth
+
         <div class="text-center mb-5">
-            <h2 class="fw-bold mb-3">Portal Pengelola</h2>
-            <p class="text-muted">Masuk untuk mengelola operasional Rumah Gas dan Galon</p>
+            <h2 class="fw-bold mb-3">Selamat Datang</h2>
+            <p class="text-muted">Pilih akses masuk untuk mengelola operasional Rumah Gas dan Galon</p>
         </div>
         
         <div class="row justify-content-center g-4">
-            <div class="col-md-8 col-lg-6">
+            <!-- Kasir -->
+            <div class="col-md-6 col-lg-5">
+                <div class="card card-option">
+                    <div class="card-body text-center p-5">
+                        <div class="card-icon icon-kasir">
+                            <i class="bi bi-cash-stack"></i>
+                        </div>
+                        <h3 class="card-title fw-bold mb-3">Masuk sebagai Kasir</h3>
+                        <p class="card-text text-muted mb-4">
+                            Proses pesanan pelanggan dan cek ketersediaan stok langsung dari meja kasir.
+                        </p>
+
+                        <div class="mb-4 text-start">
+                            <h6 class="fw-bold">Fitur Kasir:</h6>
+                            <ul class="feature-list list-unstyled">
+                                <li><i class="bi bi-check-circle"></i> Buat dan proses pesanan kasir</li>
+                                <li><i class="bi bi-check-circle"></i> Validasi pesanan dari aplikasi mobile</li>
+                                <li><i class="bi bi-check-circle"></i> Cek stok gas dan galon</li>
+                                <li><i class="bi bi-check-circle"></i> Catat barang masuk dan keluar</li>
+                            </ul>
+                        </div>
+
+                        <a href="{{ route('login', ['sebagai' => 'kasir']) }}" class="btn btn-kasir btn-lg w-100">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>Masuk sebagai Kasir
+                        </a>
+
+                        <p class="text-muted mt-3 small mb-0">
+                            Belum punya akun? <a href="{{ route('register') }}" class="text-decoration-none">Daftar sebagai kasir</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pengelola -->
+            <div class="col-md-6 col-lg-5">
                 <div class="card card-option">
                     <div class="card-body text-center p-5">
                         <div class="card-icon icon-pedagang">
@@ -336,7 +397,7 @@
                             <i class="bi bi-box-arrow-in-right me-2"></i>Masuk ke Dashboard
                         </a>
                         
-                        <p class="text-muted mt-3 small">
+                        <p class="text-muted mt-3 small mb-0">
                             <i class="bi bi-shield-lock me-1"></i>
                             Hanya pengelola toko yang terdaftar
                         </p>
