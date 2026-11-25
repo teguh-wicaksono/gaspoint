@@ -69,6 +69,7 @@ class AuthController extends Controller
             'name' => 'required|string|max:255|min:3',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|confirmed|min:3',
+            'role' => 'required|in:admin,pembeli,kurir',
         ], [
             'name.required' => 'Nama lengkap wajib diisi',
             'name.min' => 'Nama minimal 3 karakter',
@@ -78,6 +79,8 @@ class AuthController extends Controller
             'password.required' => 'Password wajib diisi',
             'password.min' => 'Password minimal 3 karakter',
             'password.confirmed' => 'Konfirmasi password tidak cocok',
+            'role.required' => 'Role wajib dipilih',
+            'role.in' => 'Role tidak valid',
         ]);
 
         if ($validator->fails()) {
@@ -90,6 +93,7 @@ class AuthController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'role' => $request->role,
         ]);
 
         Auth::login($user);
