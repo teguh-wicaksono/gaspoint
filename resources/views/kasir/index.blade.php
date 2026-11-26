@@ -95,6 +95,13 @@
                         <span class="fs-4 fw-bold text-success" id="total">Rp 0</span>
                     </div>
 
+                    <div class="btn-group w-100 mb-3" role="group" aria-label="Metode pembelian">
+                        <input type="radio" class="btn-check" name="metode" id="metode-antar" value="antar" @checked(old('metode', 'antar') === 'antar')>
+                        <label class="btn btn-outline-warning" for="metode-antar"><i class="fas fa-truck me-1"></i> Antar</label>
+                        <input type="radio" class="btn-check" name="metode" id="metode-langsung" value="langsung" @checked(old('metode') === 'langsung')>
+                        <label class="btn btn-outline-success" for="metode-langsung"><i class="fas fa-store me-1"></i> Beli langsung</label>
+                    </div>
+
                     <div class="mb-2">
                         <label class="form-label small mb-1" for="nama_pembeli">Nama pembeli</label>
                         <input type="text" id="nama_pembeli" name="nama_pembeli" value="{{ old('nama_pembeli') }}"
@@ -112,14 +119,14 @@
                                    class="form-control" required>
                         </div>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label small mb-1" for="alamat">Alamat</label>
+                    <div class="mb-3" id="wrap-alamat">
+                        <label class="form-label small mb-1" for="alamat">Alamat pengantaran</label>
                         <textarea id="alamat" name="alamat" rows="2" class="form-control" maxlength="500" required>{{ old('alamat') }}</textarea>
                     </div>
 
                     <div class="d-flex gap-2">
                         <button type="submit" class="btn btn-success flex-grow-1" id="btn-simpan" disabled>
-                            <i class="fas fa-check me-1"></i> Simpan Pesanan
+                            <i class="fas fa-check me-1"></i> <span id="teks-simpan">Simpan Pesanan</span>
                         </button>
                         <button type="button" class="btn btn-outline-secondary" id="btn-kosongkan" title="Kosongkan keranjang">
                             <i class="fas fa-trash"></i>
@@ -139,6 +146,7 @@
                         </a>
                         <span class="small">
                             Rp {{ number_format($p->total_harga, 0, ',', '.') }}
+                            <span class="badge {{ $p->metode === 'antar' ? 'bg-warning text-dark' : 'bg-success' }} ms-1">{{ $p->metode === 'antar' ? 'Antar' : 'Langsung' }}</span>
                             <span class="badge bg-secondary ms-1">{{ $p->status }}</span>
                         </span>
                     </li>
@@ -256,6 +264,17 @@ document.addEventListener('DOMContentLoaded', function () {
     $('form-kasir').addEventListener('submit', e => {
         if (!Object.keys(cart).length) e.preventDefault();
     });
+
+    // Antar: nama, HP, alamat wajib. Beli langsung: data pembeli opsional, pesanan langsung selesai.
+    function aturMetode() {
+        const langsung = document.querySelector('input[name=metode]:checked').value === 'langsung';
+        $('wrap-alamat').classList.toggle('d-none', langsung);
+        ['alamat', 'nama_pembeli', 'no_hp'].forEach(id => { $(id).required = !langsung; });
+        ['nama_pembeli', 'no_hp'].forEach(id => { $(id).placeholder = langsung ? 'Opsional' : ''; });
+        $('teks-simpan').textContent = langsung ? 'Selesaikan Pembelian' : 'Simpan Pesanan';
+    }
+    document.querySelectorAll('input[name=metode]').forEach(r => r.addEventListener('change', aturMetode));
+    aturMetode();
 
     render();
 });
