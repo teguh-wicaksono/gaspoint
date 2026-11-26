@@ -366,6 +366,14 @@
 
             <li class="nav-title">Transaksi</li>
 
+            <!-- Halaman Kasir (POS) -->
+            <li class="nav-item">
+                <a class="nav-link {{ Request::routeIs('kasir.*') ? 'active' : '' }}"
+                   href="{{ route('kasir.index') }}">
+                    <i class="nav-icon fas fa-store me-2"></i><span class="nav-label">Kasir</span>
+                </a>
+            </li>
+
             <!-- Pesanan Kasir -->
             <li class="nav-item">
                 <a class="nav-link {{ Request::routeIs('pesanan.*') ? 'active' : '' }}"

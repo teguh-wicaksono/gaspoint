@@ -15,7 +15,7 @@ class AuthController extends Controller
     public function showLogin(Request $request)
     {
         if (Auth::check()) {
-            return redirect()->route('dashboard');
+            return redirect()->route(Auth::user()->homeRoute());
         }
 
         // ?sebagai=kasir dikirim dari landing page "Masuk sebagai Kasir"
@@ -54,7 +54,7 @@ class AuthController extends Controller
         if (Auth::attempt($credentials, $remember)) {
             $request->session()->regenerate();
             
-            return redirect()->route('dashboard')
+            return redirect()->route(auth()->user()->homeRoute())
                 ->with('success', 'Login berhasil! Selamat datang ' . auth()->user()->name);
         }
 
@@ -69,7 +69,7 @@ class AuthController extends Controller
     public function showRegister()
     {
         if (Auth::check()) {
-            return redirect()->route('dashboard');
+            return redirect()->route(Auth::user()->homeRoute());
         }
         return view('auth.register');
     }
@@ -109,7 +109,7 @@ class AuthController extends Controller
 
         Auth::login($user);
         
-        return redirect()->route('dashboard')
+        return redirect()->route($user->homeRoute())
             ->with('success', 'Registrasi berhasil! Selamat datang ' . $user->name);
     }
 

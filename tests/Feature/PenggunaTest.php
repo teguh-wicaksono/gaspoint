@@ -188,7 +188,7 @@ class PenggunaTest extends TestCase
             'email' => 'orang@rumahgas.test',
             'password' => 'abc123',
             'password_confirmation' => 'abc123',
-        ])->assertRedirect(route('dashboard'));
+        ])->assertRedirect(route('kasir.index'));
 
         $this->assertDatabaseHas('users', ['email' => 'orang@rumahgas.test', 'role' => User::ROLE_KASIR]);
         $this->get(route('pengguna.index'))->assertForbidden();

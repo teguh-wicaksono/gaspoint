@@ -12,6 +12,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Pengguna yang sudah login & membuka /login atau /register dikembalikan ke halaman rolenya.
+        $middleware->redirectUsersTo(fn (Request $request) => route($request->user()->homeRoute()));
+
         $middleware->alias([
             'role' => \App\Http\Middleware\RoleMiddleware::class,
         ]);
