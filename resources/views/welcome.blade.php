@@ -18,7 +18,6 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #f8f9fc 0%, #e3e6f0 100%);
             min-height: 100vh;
-            min-width: 320px;
         }
         
         .hero-section {
@@ -423,23 +422,23 @@
                         </p>
                     </div>
                 </div>
+            </div>
 
-                <!-- Pembeli -->
-                <div class="col-md-6 col-lg-4">
-                    <div class="card card-option">
-                        <div class="card-body text-center p-5">
-                            <div class="card-icon icon-pembeli">
-                                <i class="bi bi-person"></i>
-                            </div>
-                            <h3 class="card-title fw-bold mb-3">Masuk sebagai Pembeli</h3>
-                            <p class="card-text text-muted mb-4">
-                                Lihat katalog gas dan galon serta ringkasan dashboard pembeli tanpa perlu login.
-                            </p>
-
-                            <a href="{{ route('dashboard.pembeli') }}" class="btn btn-pembeli btn-lg w-100">
-                                <i class="bi bi-box-arrow-in-right me-2"></i>Masuk sebagai Pembeli
-                            </a>
+            <!-- Pembeli -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card card-option">
+                    <div class="card-body text-center p-5">
+                        <div class="card-icon icon-pembeli">
+                            <i class="bi bi-person"></i>
                         </div>
+                        <h3 class="card-title fw-bold mb-3">Masuk sebagai Pembeli</h3>
+                        <p class="card-text text-muted mb-4">
+                            Lihat katalog gas dan galon serta ringkasan dashboard pembeli tanpa perlu login.
+                        </p>
+
+                        <a href="{{ route('dashboard.pembeli') }}" class="btn btn-pembeli btn-lg w-100">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>Masuk sebagai Pembeli
+                        </a>
                     </div>
                 </div>
             </div>
