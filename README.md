@@ -3,7 +3,7 @@ Ayo digarap, ojok mangkrak
 
 # Rumah Gas dan Galon
 
-Aplikasi pengelolaan penjualan gas dan galon (Laravel 13, PHP 8.3+, SQLite).
+Aplikasi pengelolaan penjualan gas dan galon (Laravel 13, PHP 8.3+, MySql).
 
 ## Kebutuhan
 
@@ -22,7 +22,6 @@ git checkout develop
 composer install
 copy .env.example .env
 php artisan key:generate
-New-Item database\database.sqlite -ItemType File
 php artisan migrate --seed
 php artisan serve
 ```
