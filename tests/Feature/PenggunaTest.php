@@ -181,16 +181,9 @@ class PenggunaTest extends TestCase
             ->assertOk()->assertSee('andi@rumahgas.test')->assertDontSee('budi@rumahgas.test');
     }
 
-    public function test_self_registration_creates_kasir_not_pengelola(): void
+    public function test_self_registration_is_gone(): void
     {
-        $this->post(route('register.post'), [
-            'name' => 'Orang Baru',
-            'email' => 'orang@rumahgas.test',
-            'password' => 'abc123',
-            'password_confirmation' => 'abc123',
-        ])->assertRedirect(route('kasir.index'));
-
-        $this->assertDatabaseHas('users', ['email' => 'orang@rumahgas.test', 'role' => User::ROLE_KASIR]);
-        $this->get(route('pengguna.index'))->assertForbidden();
+        $this->get('/register')->assertNotFound();
+        $this->assertFalse(\Illuminate\Support\Facades\Route::has('register.post'));
     }
 }

@@ -14,12 +14,10 @@ use Illuminate\Support\Facades\Route;
 // Public: landing page portal pengelola
 Route::get('/', [AuthController::class, 'welcome'])->name('welcome');
 
-// Guest only: login & register
+// Guest only: login
 Route::middleware('guest')->controller(AuthController::class)->group(function () {
     Route::get('/login', 'showLogin')->name('login');
     Route::post('/login', 'login')->name('login.post');
-    Route::get('/register', 'showRegister')->name('register');
-    Route::post('/register', 'register')->name('register.post');
 });
 
 // Authenticated
