@@ -347,7 +347,14 @@
     </div>
 
     <!-- Sidebar -->
-    <div class="sidebar sidebar-dark sidebar-fixed" id="sidebar">
+    @php
+        $sidebarGradient = match(Auth::user()->role ?? 'admin') {
+            'pembeli' => 'linear-gradient(180deg, #2980b9 0%, #1a5276 100%)',
+            'kurir' => 'linear-gradient(180deg, #e67e22 0%, #a04c00 100%)',
+            default => 'linear-gradient(180deg, #2eb85c 0%, #1f8a47 100%)',
+        };
+    @endphp
+    <div class="sidebar sidebar-dark sidebar-fixed" id="sidebar" style="background: {{ $sidebarGradient }};">
         <div class="sidebar-brand">
             <div class="sidebar-brand-full px-3 text-white fw-bold">
                 <i class="fas fa-fire me-2"></i> Rumah Gas & Galon
@@ -382,6 +389,7 @@
                 </a>
             </li>
 
+            @if(Auth::check() && Auth::user()->role === \App\Models\User::ROLE_PENGELOLA)
             <li class="nav-title">Inventory</li>
 
             <!-- Barang -->
@@ -452,6 +460,65 @@
                     </li>
                 </ul>
             </li>
+            @endif
+
+            @if(Auth::user()->role === 'pembeli')
+            <li class="nav-title">Belanja</li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="#" onclick="return false;" style="cursor: default; opacity: 0.6;">
+                    <i class="nav-icon fas fa-store me-2"></i><span class="nav-label">Katalog Produk</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="#" onclick="return false;" style="cursor: default; opacity: 0.6;">
+                    <i class="nav-icon fas fa-shopping-cart me-2"></i><span class="nav-label">Keranjang</span>
+                    <span class="badge bg-secondary ms-auto">0</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="#" onclick="return false;" style="cursor: default; opacity: 0.6;">
+                    <i class="nav-icon fas fa-receipt me-2"></i><span class="nav-label">Pesanan Saya</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="#" onclick="return false;" style="cursor: default; opacity: 0.6;">
+                    <i class="nav-icon fas fa-history me-2"></i><span class="nav-label">Riwayat Transaksi</span>
+                </a>
+            </li>
+            @endif
+
+            @if(Auth::user()->role === 'kurir')
+            <li class="nav-title">Pengantaran</li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="#" onclick="return false;" style="cursor: default; opacity: 0.6;">
+                    <i class="nav-icon fas fa-tasks me-2"></i><span class="nav-label">Tugas Antar</span>
+                    <span class="badge bg-secondary ms-auto">0</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="#" onclick="return false;" style="cursor: default; opacity: 0.6;">
+                    <i class="nav-icon fas fa-truck me-2"></i><span class="nav-label">Sedang Diantar</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="#" onclick="return false;" style="cursor: default; opacity: 0.6;">
+                    <i class="nav-icon fas fa-map-marked-alt me-2"></i><span class="nav-label">Rute Pengantaran</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="#" onclick="return false;" style="cursor: default; opacity: 0.6;">
+                    <i class="nav-icon fas fa-clipboard-check me-2"></i><span class="nav-label">Riwayat Antar</span>
+                </a>
+            </li>
+            @endif
 
             @if(Auth::check() && Auth::user()->role === \App\Models\User::ROLE_PENGELOLA)
                 <li class="nav-title">Pengaturan</li>
@@ -494,6 +561,15 @@
                                 aria-expanded="false">
                             <i class="fas fa-user-circle me-2"></i>
                             {{ Auth::user()->name }}
+                            @php
+                                $roleBadge = match(Auth::user()->role) {
+                                    'admin' => 'bg-success',
+                                    'pembeli' => 'bg-primary',
+                                    'kurir' => 'bg-warning text-dark',
+                                    default => 'bg-secondary',
+                                };
+                            @endphp
+                            <span class="badge {{ $roleBadge }} ms-2" style="font-size: .65rem;">{{ ucfirst(Auth::user()->role) }}</span>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li>

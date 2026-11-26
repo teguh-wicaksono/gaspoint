@@ -279,8 +279,8 @@
                     <i class="bi bi-fire"></i>
                 </div>
                 <div class="brand-name">Rumah Gas dan Galon</div>
-                <h3 class="register-title mt-2 mb-2">Registrasi Pengelola</h3>
-                <p class="text-muted mb-0">Buat akun untuk mengelola toko</p>
+                <h3 class="register-title mt-2 mb-2">Registrasi Akun</h3>
+                <p class="text-muted mb-0">Buat akun untuk mengakses sistem</p>
             </div>
             
             <!-- Messages -->
@@ -308,10 +308,38 @@
                 </div>
             @endif
             
-            <!-- Register Form (SEDERHANA - tanpa usertype) -->
+            <!-- Register Form (dengan pilihan role) -->
             <form method="POST" action="{{ route('register') }}" id="registerForm" novalidate>
                 @csrf
                 
+                <!-- Role Selection -->
+                <div class="mb-3">
+                    <label class="form-label fw-medium">Daftar Sebagai</label>
+                    <div class="d-flex gap-2">
+                        <div class="form-check flex-fill">
+                            <input class="form-check-input" type="radio" name="role" id="role_admin" value="admin" {{ old('role', 'admin') == 'admin' ? 'checked' : '' }}>
+                            <label class="form-check-label" for="role_admin">
+                                <i class="bi bi-shield-lock me-1"></i> Admin
+                            </label>
+                        </div>
+                        <div class="form-check flex-fill">
+                            <input class="form-check-input" type="radio" name="role" id="role_pembeli" value="pembeli" {{ old('role') == 'pembeli' ? 'checked' : '' }}>
+                            <label class="form-check-label" for="role_pembeli">
+                                <i class="bi bi-cart me-1"></i> Pembeli
+                            </label>
+                        </div>
+                        <div class="form-check flex-fill">
+                            <input class="form-check-input" type="radio" name="role" id="role_kurir" value="kurir" {{ old('role') == 'kurir' ? 'checked' : '' }}>
+                            <label class="form-check-label" for="role_kurir">
+                                <i class="bi bi-truck me-1"></i> Kurir
+                            </label>
+                        </div>
+                    </div>
+                    @error('role')
+                        <div class="text-danger small mt-1">{{ $message }}</div>
+                    @enderror
+                </div>
+
                 <!-- Name Input -->
                 <div class="mb-3">
                     <label for="name" class="form-label fw-medium">Nama Lengkap</label>
@@ -392,7 +420,7 @@
                 
                 <!-- Register Button -->
                 <button type="submit" class="btn btn-register" id="registerButton">
-                    <i class="bi bi-person-plus me-2"></i>Daftar Akun Pengelola
+                    <i class="bi bi-person-plus me-2"></i>Daftar Akun
                 </button>
                 
                 <!-- Footer Links -->

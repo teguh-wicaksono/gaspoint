@@ -65,7 +65,7 @@ class AuthController extends Controller
         ])->withInput($request->except('password'));
     }
 
-    // Tampilkan form register (HANYA untuk pengelola baru)
+    // Tampilkan form register
     public function showRegister()
     {
         if (Auth::check()) {
@@ -74,7 +74,7 @@ class AuthController extends Controller
         return view('auth.register');
     }
 
-    // Proses register (HANYA untuk pengelola baru) - TANPA usertype
+    // Proses register (daftar mandiri = kasir)
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [
