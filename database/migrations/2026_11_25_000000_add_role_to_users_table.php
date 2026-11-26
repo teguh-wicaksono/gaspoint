@@ -7,11 +7,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Tambah kolom role. Pembeli tidak punya akun, jadi hanya 3 role:
-     * pengelola, kasir, kurir. User lama otomatis menjadi pengelola
-     * (default) agar tidak kehilangan akses.
-     */
     public function up(): void
     {
         // Database lama sudah punya kolom role (enum admin/pembeli/kurir) dari migrasi
