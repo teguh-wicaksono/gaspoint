@@ -18,8 +18,8 @@ class AuthController extends Controller
             return redirect()->route(Auth::user()->homeRoute());
         }
 
-        // ?sebagai=kasir dikirim dari landing page "Masuk sebagai Kasir"
-        $sebagai = $request->query('sebagai') === User::ROLE_KASIR ? User::ROLE_KASIR : null;
+        // ?sebagai=kurir dikirim dari landing page "Masuk sebagai Kurir"
+        $sebagai = $this->pintuMasuk($request->query('sebagai'));
 
         return view('auth.login', compact('sebagai'));
     }
@@ -45,10 +45,10 @@ class AuthController extends Controller
         $credentials = $request->only('email', 'password');
         $remember = $request->has('remember');
 
-        // Pintu masuk kasir: hanya akun dengan role kasir yang boleh lewat.
-        $sebagai = $request->input('sebagai') === User::ROLE_KASIR ? User::ROLE_KASIR : null;
+        // Pintu masuk kasir/kurir: hanya akun dengan role tersebut yang boleh lewat.
+        $sebagai = $this->pintuMasuk($request->input('sebagai'));
         if ($sebagai) {
-            $credentials['role'] = User::ROLE_KASIR;
+            $credentials['role'] = $sebagai;
         }
 
         if (Auth::attempt($credentials, $remember)) {
@@ -60,7 +60,7 @@ class AuthController extends Controller
 
         return back()->withErrors([
             'email' => $sebagai
-                ? 'Email atau password salah, atau akun ini bukan akun kasir.'
+                ? "Email atau password salah, atau akun ini bukan akun {$sebagai}."
                 : 'Email atau password salah.',
         ])->withInput($request->except('password'));
     }
@@ -122,6 +122,11 @@ class AuthController extends Controller
         
         return redirect()->route('welcome')
             ->with('status', 'Anda telah berhasil logout.');
+    }
+
+    private function pintuMasuk(mixed $nilai): ?string
+    {
+        return in_array($nilai, [User::ROLE_KASIR, User::ROLE_KURIR], true) ? $nilai : null;
     }
 
     // Halaman portal pengelola

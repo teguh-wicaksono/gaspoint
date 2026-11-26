@@ -347,7 +347,8 @@
     </div>
 
     <!-- Sidebar -->
-    <div class="sidebar sidebar-dark sidebar-fixed" id="sidebar">
+    <div class="sidebar sidebar-dark sidebar-fixed" id="sidebar"
+         @if(Auth::user()?->hasRole('kurir')) style="--sidebar-bg: linear-gradient(180deg, #e67e22 0%, #a04c00 100%)" @endif>
         <div class="sidebar-brand">
             <div class="sidebar-brand-full px-3 text-white fw-bold">
                 <i class="fas fa-fire me-2"></i> Rumah Gas & Galon
