@@ -240,19 +240,7 @@
             color: #bb2d3b;
             text-decoration: underline;
         }
-        
-        .register-link {
-            color: var(--primary-color);
-            text-decoration: none;
-            font-weight: 500;
-            transition: color 0.3s;
-        }
-        
-        .register-link:hover {
-            color: #bb2d3b;
-            text-decoration: underline;
-        }
-        
+                
         .back-link {
             color: #6c757d;
             text-decoration: none;
@@ -449,13 +437,6 @@
                 
                 <!-- Footer Links -->
                 <div class="login-footer">
-                    @if($sebagai !== 'kurir')
-                    <div class="text-center mb-2">
-                        <p class="mb-2">Belum punya akun {{ $sebagai ?? 'pengelola' }}? 
-                            <a href="{{ route('register') }}" class="register-link fw-medium">Daftar disini</a>
-                        </p>
-                    </div>
-                    @endif
                     <div class="text-center">
                         <a href="{{ route('welcome') }}" class="back-link">
                             <i class="bi bi-arrow-left me-1"></i>Kembali ke landing page

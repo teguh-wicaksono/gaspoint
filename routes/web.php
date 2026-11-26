@@ -15,12 +15,10 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [AuthController::class, 'welcome'])->name('welcome');
 Route::view('/dashboard/pembeli', 'dashboard-pembeli')->name('dashboard.pembeli');
 
-// Guest only: login & register
+// Guest only: login
 Route::middleware('guest')->controller(AuthController::class)->group(function () {
     Route::get('/login', 'showLogin')->name('login');
     Route::post('/login', 'login')->name('login.post');
-    Route::get('/register', 'showRegister')->name('register');
-    Route::post('/register', 'register')->name('register.post');
 });
 
 // Authenticated
@@ -29,6 +27,7 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/kasir', [KasirController::class, 'index'])->middleware('role:kasir,pengelola')->name('kasir.index');
+    Route::get('/kurir/rute', [DashboardController::class, 'rute'])->middleware('role:kurir,pengelola')->name('kurir.rute');
     Route::prefix('dashboard')->name('dashboard.')->controller(DashboardController::class)->group(function () {
         Route::get('/notifications', 'notifications')->name('notifications');
         Route::post('/notifications/{notificationId}/read', 'markAsRead')->name('notifications.read');

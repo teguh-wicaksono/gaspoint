@@ -36,13 +36,13 @@ class DashboardController extends Controller
     // Antrean pengantaran dipakai bersama semua kurir (pesanan belum punya kolom kurir).
     private function getKurirData()
     {
-        $aktif = Pesanan::with('detail.barang')
+        $aktif = Pesanan::antar()->with('detail.barang')
             ->whereIn('status', ['pending', 'diproses'])
             ->orderBy('tanggal')
             ->orderBy('id_pesanan')
             ->get();
 
-        $selesai = Pesanan::where('status', 'selesai');
+        $selesai = Pesanan::antar()->where('status', 'selesai');
 
         return [
             'pesananAktif'    => $aktif,
@@ -52,6 +52,27 @@ class DashboardController extends Controller
             'selesaiBulanIni' => (clone $selesai)->whereBetween('updated_at', [now()->startOfMonth(), now()->endOfMonth()])->count(),
             'riwayat'         => (clone $selesai)->latest('updated_at')->limit(5)->get(),
         ];
+    }
+
+    // Rute = pesanan berstatus diproses (sedang diantar), urutan stop sama dengan urutan pesanan.
+    public function rute()
+    {
+        // shortcut: Google Maps hanya menerima 9 waypoint + 1 tujuan, naikkan ke Directions API bila perlu lebih.
+        $stops = Pesanan::antar()->where('status', 'diproses')
+            ->orderBy('tanggal')->orderBy('id_pesanan')
+            ->limit(10)->get();
+
+        $mapsUrl = null;
+        if ($stops->isNotEmpty()) {
+            $mapsUrl = 'https://www.google.com/maps/dir/?' . http_build_query(array_filter([
+                'api'         => 1,
+                'travelmode'  => 'driving',
+                'destination' => $stops->last()->alamat,
+                'waypoints'   => $stops->slice(0, -1)->pluck('alamat')->implode('|'),
+            ]));
+        }
+
+        return view('kurir.rute', compact('stops', 'mapsUrl'));
     }
 
     private function getDashboardData()
