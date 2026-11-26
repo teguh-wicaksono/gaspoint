@@ -28,7 +28,7 @@
     <div class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3">
         <div>
             <div class="small text-white-50 text-uppercase fw-semibold mb-2">Panel Pembeli</div>
-            <h1 class="h2 fw-bold mb-2">Selamat datang, {{ Auth::user()->name }}!</h1>
+            <h1 class="h2 fw-bold mb-2">Selamat datang, {{ Auth::user()?->name ?? 'Pembeli' }}!</h1>
             <p class="mb-0 text-white-50">Pesan gas dan galon dengan mudah dan cepat.</p>
         </div>
         <div class="d-flex gap-2 flex-wrap">

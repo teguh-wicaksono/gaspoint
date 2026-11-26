@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Route;
 
 // Public: landing page portal pengelola
 Route::get('/', [AuthController::class, 'welcome'])->name('welcome');
+Route::view('/dashboard/pembeli', 'dashboard-pembeli')->name('dashboard.pembeli');
 
 // Guest only: login & register
 Route::middleware('guest')->controller(AuthController::class)->group(function () {
