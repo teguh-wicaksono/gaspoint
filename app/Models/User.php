@@ -51,6 +51,12 @@ class User extends Authenticatable
         return in_array($this->role, $roles, true);
     }
 
+    /** Halaman awal setelah login: kasir langsung ke halaman kasir. */
+    public function homeRoute(): string
+    {
+        return $this->hasRole(self::ROLE_KASIR) ? 'kasir.index' : 'dashboard';
+    }
+
     public function isPengelola(): bool
     {
         return $this->hasRole(self::ROLE_PENGELOLA);

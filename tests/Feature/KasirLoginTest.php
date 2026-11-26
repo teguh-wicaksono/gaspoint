@@ -44,7 +44,7 @@ class KasirLoginTest extends TestCase
             'email' => 'kasir@rumahgas.test',
             'password' => 'password123',
             'sebagai' => 'kasir',
-        ])->assertRedirect(route('dashboard'));
+        ])->assertRedirect(route('kasir.index'));
 
         $this->assertAuthenticated();
     }
@@ -66,7 +66,7 @@ class KasirLoginTest extends TestCase
     {
         $kasir = $this->makeUser(User::ROLE_KASIR, 'kasir@rumahgas.test');
 
-        foreach (['dashboard', 'pesanan.index', 'barang.index', 'profile.index'] as $name) {
+        foreach (['kasir.index', 'dashboard', 'pesanan.index', 'barang.index', 'profile.index'] as $name) {
             $this->actingAs($kasir)->get(route($name))
                 ->assertOk()
                 ->assertSee(route('logout'), false);

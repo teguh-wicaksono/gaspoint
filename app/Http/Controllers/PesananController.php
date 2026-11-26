@@ -151,6 +151,11 @@ class PesananController extends Controller
 
         $this->notify($pesanan, 'Pesanan baru #' . $this->kode($pesanan) . ' dari ' . $pesanan->nama_pembeli);
 
+        if ($request->input('dari') === 'kasir') {
+            return redirect()->route('kasir.index')
+                ->with('success', 'Pesanan #' . $this->kode($pesanan) . ' berhasil dibuat. Total Rp ' . number_format($pesanan->total_harga, 0, ',', '.'));
+        }
+
         return redirect()->route('pesanan.show', $pesanan)
             ->with('success', 'Pesanan berhasil dibuat.');
     }

@@ -319,8 +319,8 @@
                     Anda masuk sebagai <strong>{{ auth()->user()->name }}</strong> ({{ auth()->user()->role_label }})
                 </div>
                 <div class="d-flex gap-2">
-                    <a href="{{ route('dashboard') }}" class="btn btn-success btn-sm">
-                        <i class="bi bi-speedometer2 me-1"></i>Ke Dashboard
+                    <a href="{{ route(auth()->user()->homeRoute()) }}" class="btn btn-success btn-sm">
+                        <i class="bi bi-speedometer2 me-1"></i>{{ auth()->user()->hasRole('kasir') ? 'Ke Halaman Kasir' : 'Ke Dashboard' }}
                     </a>
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
