@@ -26,7 +26,9 @@ class ExampleTest extends TestCase
         $this->get(route('dashboard.pembeli'))
             ->assertOk()
             ->assertSee('Dashboard Pembeli')
-            ->assertSee('Selamat datang, Pembeli!');
+            ->assertSee('Selamat datang, Pembeli!')
+            ->assertSee('Kembali ke Loading Page')
+            ->assertSee(route('welcome'), false);
 
         $this->assertGuest();
     }
