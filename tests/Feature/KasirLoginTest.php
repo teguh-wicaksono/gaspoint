@@ -20,12 +20,13 @@ class KasirLoginTest extends TestCase
         ]);
     }
 
-    public function test_landing_page_has_kasir_entry(): void
+    public function test_landing_page_has_kurir_entry(): void
     {
         $this->get(route('welcome'))
             ->assertOk()
-            ->assertSee('Masuk sebagai Kasir')
-            ->assertSee(route('login', ['sebagai' => 'kasir']), false);
+            ->assertSee('Masuk sebagai Kurir')
+            ->assertSee(route('login', ['sebagai' => 'kurir']), false)
+            ->assertDontSee('Masuk sebagai Kasir');
     }
 
     public function test_kasir_login_page_shows_kasir_form(): void

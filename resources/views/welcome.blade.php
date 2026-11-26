@@ -93,16 +93,16 @@
             color: white;
         }
         
-        .icon-kasir {
-            background: linear-gradient(135deg, var(--success-color) 0%, #17a673 100%);
+        .icon-kurir {
+            background: linear-gradient(135deg, #e67e22 0%, #cf6d17 100%);
         }
         
         .icon-pedagang {
             background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
         }
         
-        .btn-kasir {
-            background: var(--success-color);
+        .btn-kurir {
+            background: #e67e22;
             border: none;
             padding: 12px 30px;
             border-radius: 10px;
@@ -111,8 +111,8 @@
             color: white;
         }
         
-        .btn-kasir:hover {
-            background: #17a673;
+        .btn-kurir:hover {
+            background: #cf6d17;
             transform: scale(1.05);
             color: white;
         }
@@ -320,7 +320,7 @@
                 </div>
                 <div class="d-flex gap-2">
                     <a href="{{ route(auth()->user()->homeRoute()) }}" class="btn btn-success btn-sm">
-                        <i class="bi bi-speedometer2 me-1"></i>{{ auth()->user()->hasRole('kasir') ? 'Ke Halaman Kasir' : 'Ke Dashboard' }}
+                        <i class="bi bi-speedometer2 me-1"></i>{{ auth()->user()->isPengelola() ? 'Ke Dashboard' : 'Ke Halaman ' . auth()->user()->role_label }}
                     </a>
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
@@ -338,34 +338,34 @@
         </div>
         
         <div class="row justify-content-center g-4">
-            <!-- Kasir -->
+            <!-- Kurir -->
             <div class="col-md-6 col-lg-5">
                 <div class="card card-option">
                     <div class="card-body text-center p-5">
-                        <div class="card-icon icon-kasir">
-                            <i class="bi bi-cash-stack"></i>
+                        <div class="card-icon icon-kurir">
+                            <i class="bi bi-truck"></i>
                         </div>
-                        <h3 class="card-title fw-bold mb-3">Masuk sebagai Kasir</h3>
+                        <h3 class="card-title fw-bold mb-3">Masuk sebagai Kurir</h3>
                         <p class="card-text text-muted mb-4">
-                            Proses pesanan pelanggan dan cek ketersediaan stok langsung dari meja kasir.
+                            Lihat pesanan yang perlu diantar dan perbarui status pengantaran langsung dari ponsel.
                         </p>
 
                         <div class="mb-4 text-start">
-                            <h6 class="fw-bold">Fitur Kasir:</h6>
+                            <h6 class="fw-bold">Fitur Kurir:</h6>
                             <ul class="feature-list list-unstyled">
-                                <li><i class="bi bi-check-circle"></i> Buat dan proses pesanan kasir</li>
-                                <li><i class="bi bi-check-circle"></i> Validasi pesanan dari aplikasi mobile</li>
-                                <li><i class="bi bi-check-circle"></i> Cek stok gas dan galon</li>
-                                <li><i class="bi bi-check-circle"></i> Catat barang masuk dan keluar</li>
+                                <li><i class="bi bi-check-circle"></i> Daftar pesanan yang perlu diantar</li>
+                                <li><i class="bi bi-check-circle"></i> Alamat dan nomor HP pembeli</li>
+                                <li><i class="bi bi-check-circle"></i> Buka lokasi pengantaran di peta</li>
+                                <li><i class="bi bi-check-circle"></i> Tandai pesanan diantar dan selesai</li>
                             </ul>
                         </div>
 
-                        <a href="{{ route('login', ['sebagai' => 'kasir']) }}" class="btn btn-kasir btn-lg w-100">
-                            <i class="bi bi-box-arrow-in-right me-2"></i>Masuk sebagai Kasir
+                        <a href="{{ route('login', ['sebagai' => 'kurir']) }}" class="btn btn-kurir btn-lg w-100">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>Masuk sebagai Kurir
                         </a>
 
                         <p class="text-muted mt-3 small mb-0">
-                            Belum punya akun? <a href="{{ route('register') }}" class="text-decoration-none">Daftar sebagai kasir</a>
+                            Akun kurir dibuat oleh pengelola.
                         </p>
                     </div>
                 </div>

@@ -13,131 +13,89 @@
     .kurir-section .card-header { background: #fff; border-bottom-color: #edf0ee; padding: 1.1rem 1.25rem; }
     .delivery-card { border-left: 4px solid #e67e22; border-radius: .5rem; padding: 1rem; margin-bottom: .75rem; background: #fffdf8; transition: background .2s; }
     .delivery-card:hover { background: #fff8ed; }
-    .delivery-card.urgent { border-left-color: #dc3545; }
-    .map-placeholder { background: linear-gradient(135deg, #f0f4f8, #dfe6ed); border-radius: 1rem; height: 250px; display: flex; align-items: center; justify-content: center; flex-direction: column; color: #6c757d; }
 </style>
 @endpush
 
 @section('content')
 <div class="kurir-hero p-4 p-lg-5 mb-4">
-    <div class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3">
-        <div>
-            <div class="small text-white-50 text-uppercase fw-semibold mb-2">Panel Kurir</div>
-            <h1 class="h2 fw-bold mb-2">Halo, {{ Auth::user()->name }}!</h1>
-            <p class="mb-0 text-white-50">Kelola pengantaran pesanan gas dan galon.</p>
-        </div>
-        <div class="d-flex gap-2 flex-wrap">
-            <button class="btn btn-light text-warning fw-semibold" disabled>
-                <i class="fas fa-route me-2"></i>Mulai Antar
-            </button>
-            <button class="btn btn-outline-light" disabled>
-                <i class="fas fa-list-check me-2"></i>Daftar Tugas
-            </button>
-        </div>
-    </div>
+    <div class="small text-white-50 text-uppercase fw-semibold mb-2">Panel Kurir</div>
+    <h1 class="h2 fw-bold mb-2">Halo, {{ Auth::user()->name }}!</h1>
+    <p class="mb-0 text-white-50">Kelola pengantaran pesanan gas dan galon.</p>
 </div>
 
 {{-- Statistik Kurir --}}
+@php
+    $stats = [
+        ['Menunggu Diantar', $menunggu, 'fa-box', 'Pesanan belum berangkat'],
+        ['Sedang Diantar', $diantar, 'fa-truck', 'Pengantaran aktif'],
+        ['Selesai Hari Ini', $selesaiHariIni, 'fa-check-double', 'Terkirim hari ini'],
+        ['Selesai Bulan Ini', $selesaiBulanIni, 'fa-chart-bar', 'Bulan ' . now()->translatedFormat('F Y')],
+    ];
+@endphp
 <div class="row g-3 mb-4">
+    @foreach($stats as [$label, $nilai, $ikon, $ket])
     <div class="col-12 col-sm-6 col-xl-3">
         <div class="card kurir-stat"><div class="card-body">
-            <div class="d-flex justify-content-between align-items-start"><div><div class="small text-body-secondary mb-2">Pesanan Hari Ini</div><div class="stat-value">0</div></div><span class="stat-icon"><i class="fas fa-box"></i></span></div>
-            <div class="small text-body-secondary mt-3">Belum ada pesanan masuk</div>
+            <div class="d-flex justify-content-between align-items-start"><div><div class="small text-body-secondary mb-2">{{ $label }}</div><div class="stat-value">{{ $nilai }}</div></div><span class="stat-icon"><i class="fas {{ $ikon }}"></i></span></div>
+            <div class="small text-body-secondary mt-3">{{ $ket }}</div>
         </div></div>
     </div>
-    <div class="col-12 col-sm-6 col-xl-3">
-        <div class="card kurir-stat"><div class="card-body">
-            <div class="d-flex justify-content-between align-items-start"><div><div class="small text-body-secondary mb-2">Sedang Diantar</div><div class="stat-value">0</div></div><span class="stat-icon"><i class="fas fa-truck"></i></span></div>
-            <div class="small text-body-secondary mt-3">Tidak ada pengantaran aktif</div>
-        </div></div>
-    </div>
-    <div class="col-12 col-sm-6 col-xl-3">
-        <div class="card kurir-stat"><div class="card-body">
-            <div class="d-flex justify-content-between align-items-start"><div><div class="small text-body-secondary mb-2">Selesai Hari Ini</div><div class="stat-value">0</div></div><span class="stat-icon"><i class="fas fa-check-double"></i></span></div>
-            <div class="small text-body-secondary mt-3">Belum ada pengantaran selesai</div>
-        </div></div>
-    </div>
-    <div class="col-12 col-sm-6 col-xl-3">
-        <div class="card kurir-stat"><div class="card-body">
-            <div class="d-flex justify-content-between align-items-start"><div><div class="small text-body-secondary mb-2">Total Pengantaran Bulan Ini</div><div class="stat-value">0</div></div><span class="stat-icon"><i class="fas fa-chart-bar"></i></span></div>
-            <div class="small text-body-secondary mt-3">Bulan {{ now()->translatedFormat('F Y') }}</div>
-        </div></div>
-    </div>
+    @endforeach
 </div>
 
-<div class="row g-3">
-    {{-- Daftar Pengantaran --}}
-    <div class="col-xl-8">
-        <div class="card kurir-section shadow-sm h-100">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <div><h2 class="h6 fw-bold mb-1">Daftar Pengantaran</h2><div class="small text-body-secondary">Pesanan yang perlu diantar hari ini</div></div>
-                <div class="d-flex gap-2">
-                    <span class="badge bg-warning text-dark"><i class="fas fa-clock me-1"></i>Menunggu: 0</span>
-                    <span class="badge bg-primary"><i class="fas fa-truck me-1"></i>Diantar: 0</span>
-                </div>
-            </div>
-            <div class="card-body">
-                <div class="text-center text-body-secondary py-5">
-                    <i class="fas fa-truck-loading fa-3x mb-3 text-muted"></i>
-                    <p class="mb-1 fw-semibold">Belum ada pengantaran</p>
-                    <p class="small mb-0">Pesanan yang perlu diantar akan muncul di sini.</p>
-                </div>
-
-                {{-- Contoh tampilan kartu pengantaran (saat ada data) --}}
-                <div class="d-none">
-                    <div class="delivery-card">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div>
-                                <span class="badge bg-warning text-dark mb-2"><i class="fas fa-clock me-1"></i>Menunggu</span>
-                                <h6 class="fw-bold mb-1">#0001 - Budi Santoso</h6>
-                                <p class="small text-body-secondary mb-1"><i class="fas fa-map-marker-alt me-1"></i>Jl. Merdeka No. 10, RT 05/03</p>
-                                <p class="small text-body-secondary mb-0"><i class="fas fa-box me-1"></i>Gas LPG 3kg x2, Galon x1</p>
-                            </div>
-                            <div class="text-end">
-                                <div class="fw-bold">Rp 48.000</div>
-                                <button class="btn btn-sm btn-primary mt-2" disabled><i class="fas fa-route me-1"></i>Antar</button>
-                            </div>
-                        </div>
+{{-- Daftar Pengantaran --}}
+<div class="card kurir-section shadow-sm">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <div><h2 class="h6 fw-bold mb-1">Daftar Pengantaran</h2><div class="small text-body-secondary">Pesanan yang belum selesai diantar</div></div>
+        <div class="d-flex gap-2">
+            <span class="badge bg-warning text-dark"><i class="fas fa-clock me-1"></i>Menunggu: {{ $menunggu }}</span>
+            <span class="badge bg-primary"><i class="fas fa-truck me-1"></i>Diantar: {{ $diantar }}</span>
+        </div>
+    </div>
+    <div class="card-body">
+        @forelse($pesananAktif as $p)
+            @php
+                $diproses = $p->status === 'diproses';
+                $items = $p->detail->map(fn ($d) => ($d->barang->nama_barang ?? 'Barang') . ' x' . $d->jumlah)->implode(', ');
+            @endphp
+            <div class="delivery-card">
+                <div class="d-flex justify-content-between align-items-start gap-3">
+                    <div>
+                        <span class="badge {{ $diproses ? 'bg-primary' : 'bg-warning text-dark' }} mb-2">
+                            <i class="fas {{ $diproses ? 'fa-truck' : 'fa-clock' }} me-1"></i>{{ $diproses ? 'Sedang diantar' : 'Menunggu' }}
+                        </span>
+                        <h6 class="fw-bold mb-1">
+                            <a href="{{ route('pesanan.show', $p) }}" class="text-decoration-none text-body">#{{ str_pad($p->id_pesanan, 4, '0', STR_PAD_LEFT) }} - {{ $p->nama_pembeli }}</a>
+                        </h6>
+                        <p class="small text-body-secondary mb-1">
+                            <i class="fas fa-map-marker-alt me-1"></i>{{ $p->alamat }}
+                            <a href="https://www.google.com/maps/search/?api=1&query={{ urlencode($p->alamat) }}" target="_blank" rel="noopener" class="ms-1">Buka peta</a>
+                        </p>
+                        <p class="small text-body-secondary mb-1">
+                            <i class="fas fa-phone me-1"></i><a href="tel:{{ preg_replace('/[^0-9+]/', '', $p->no_hp) }}">{{ $p->no_hp }}</a>
+                        </p>
+                        @if($items)
+                            <p class="small text-body-secondary mb-0"><i class="fas fa-box me-1"></i>{{ $items }}</p>
+                        @endif
+                    </div>
+                    <div class="text-end">
+                        <div class="fw-bold">Rp {{ number_format($p->total_harga, 0, ',', '.') }}</div>
+                        <form method="POST" action="{{ route('pesanan.status', $p) }}" class="mt-2">
+                            @csrf
+                            <button type="submit" class="btn btn-sm {{ $diproses ? 'btn-success' : 'btn-primary' }}">
+                                <i class="fas {{ $diproses ? 'fa-check' : 'fa-route' }} me-1"></i>{{ $diproses ? 'Selesai' : 'Antar' }}
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-
-    {{-- Peta & Info --}}
-    <div class="col-xl-4">
-        <div class="card kurir-section shadow-sm mb-3">
-            <div class="card-header"><h2 class="h6 fw-bold mb-1">Area Pengantaran</h2><div class="small text-body-secondary">Peta rute pengantaran</div></div>
-            <div class="card-body">
-                <div class="map-placeholder">
-                    <i class="fas fa-map-marked-alt fa-3x mb-2"></i>
-                    <p class="mb-0 fw-semibold">Peta akan ditampilkan di sini</p>
-                    <p class="small mb-0">Saat ada pesanan aktif</p>
-                </div>
+        @empty
+            <div class="text-center text-body-secondary py-5">
+                <i class="fas fa-truck-loading fa-3x mb-3 text-muted"></i>
+                <p class="mb-1 fw-semibold">Belum ada pengantaran</p>
+                <p class="small mb-0">Pesanan yang perlu diantar akan muncul di sini.</p>
             </div>
-        </div>
-
-        <div class="card kurir-section shadow-sm">
-            <div class="card-header"><h2 class="h6 fw-bold mb-1">Ringkasan Harian</h2><div class="small text-body-secondary">Statistik pengantaran hari ini</div></div>
-            <div class="card-body">
-                <div class="d-flex justify-content-between py-2 border-bottom">
-                    <span class="text-body"><i class="fas fa-box text-warning me-2"></i>Menunggu diambil</span>
-                    <strong class="text-body">0</strong>
-                </div>
-                <div class="d-flex justify-content-between py-2 border-bottom">
-                    <span class="text-body"><i class="fas fa-truck text-primary me-2"></i>Sedang diantar</span>
-                    <strong class="text-body">0</strong>
-                </div>
-                <div class="d-flex justify-content-between py-2 border-bottom">
-                    <span class="text-body"><i class="fas fa-check-circle text-success me-2"></i>Terkirim</span>
-                    <strong class="text-body">0</strong>
-                </div>
-                <div class="d-flex justify-content-between py-2">
-                    <span class="text-body"><i class="fas fa-times-circle text-danger me-2"></i>Gagal/Batal</span>
-                    <strong class="text-body">0</strong>
-                </div>
-            </div>
-        </div>
+        @endforelse
     </div>
 </div>
 
@@ -145,13 +103,23 @@
 <div class="card kurir-section shadow-sm mt-3">
     <div class="card-header d-flex justify-content-between align-items-center">
         <div><h2 class="h6 fw-bold mb-1">Riwayat Pengantaran</h2><div class="small text-body-secondary">Lima pengantaran terakhir</div></div>
-        <button class="btn btn-sm btn-outline-secondary" disabled><i class="fas fa-history me-1"></i>Lihat Semua</button>
+        <a href="{{ route('pesanan.index', ['status' => 'selesai']) }}" class="btn btn-sm btn-outline-secondary"><i class="fas fa-history me-1"></i>Lihat Semua</a>
     </div>
     <div class="table-responsive">
         <table class="table align-middle mb-0">
             <thead class="table-light"><tr><th class="ps-4">No. Pesanan</th><th>Pembeli</th><th>Alamat</th><th>Status</th><th class="text-end pe-4">Waktu</th></tr></thead>
             <tbody>
-                <tr><td colspan="5" class="text-center text-body-secondary py-4">Belum ada riwayat pengantaran.</td></tr>
+                @forelse($riwayat as $r)
+                    <tr>
+                        <td class="ps-4">#{{ str_pad($r->id_pesanan, 4, '0', STR_PAD_LEFT) }}</td>
+                        <td>{{ $r->nama_pembeli }}</td>
+                        <td>{{ \Illuminate\Support\Str::limit($r->alamat, 40) }}</td>
+                        <td><span class="badge bg-success">Terkirim</span></td>
+                        <td class="text-end pe-4">{{ $r->updated_at->format('d M H:i') }}</td>
+                    </tr>
+                @empty
+                    <tr><td colspan="5" class="text-center text-body-secondary py-4">Belum ada riwayat pengantaran.</td></tr>
+                @endforelse
             </tbody>
         </table>
     </div>

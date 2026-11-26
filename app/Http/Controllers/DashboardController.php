@@ -27,10 +27,31 @@ class DashboardController extends Controller
         }
 
         if ($user->role === 'kurir') {
-            return view('dashboard-kurir');
+            return view('dashboard-kurir', $this->getKurirData());
         }
 
         return view('dashboard', $this->getDashboardData());
+    }
+
+    // Antrean pengantaran dipakai bersama semua kurir (pesanan belum punya kolom kurir).
+    private function getKurirData()
+    {
+        $aktif = Pesanan::with('detail.barang')
+            ->whereIn('status', ['pending', 'diproses'])
+            ->orderBy('tanggal')
+            ->orderBy('id_pesanan')
+            ->get();
+
+        $selesai = Pesanan::where('status', 'selesai');
+
+        return [
+            'pesananAktif'    => $aktif,
+            'menunggu'        => $aktif->where('status', 'pending')->count(),
+            'diantar'         => $aktif->where('status', 'diproses')->count(),
+            'selesaiHariIni'  => (clone $selesai)->whereDate('updated_at', today())->count(),
+            'selesaiBulanIni' => (clone $selesai)->whereBetween('updated_at', [now()->startOfMonth(), now()->endOfMonth()])->count(),
+            'riwayat'         => (clone $selesai)->latest('updated_at')->limit(5)->get(),
+        ];
     }
 
     private function getDashboardData()

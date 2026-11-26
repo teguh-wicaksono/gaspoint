@@ -3,8 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    @php $isKasir = ($sebagai ?? null) === 'kasir'; @endphp
-    <title>{{ $isKasir ? 'Login Kasir' : 'Login Pengelola' }} - Rumah Gas dan Galon</title>
+    @php
+        $sebagai = $sebagai ?? null; // kasir | kurir | null (pengelola)
+        $judul = $sebagai ? 'Login ' . ucfirst($sebagai) : 'Login Pengelola';
+        $subjudul = [
+            'kasir' => 'Masuk untuk memproses pesanan dan transaksi toko',
+            'kurir' => 'Masuk untuk mengantar pesanan dan memperbarui statusnya',
+        ][$sebagai ?? ''] ?? 'Akses dashboard pengelolaan toko';
+    @endphp
+    <title>{{ $judul }} - Rumah Gas dan Galon</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
@@ -344,8 +351,8 @@
                     <i class="bi bi-fire"></i>
                 </div>
                 <div class="brand-name">Rumah Gas dan Galon</div>
-                <h3 class="fw-bold mt-2 mb-2" style="color: #333;">{{ $isKasir ? 'Login Kasir' : 'Login Pengelola' }}</h3>
-                <p class="text-muted mb-0">{{ $isKasir ? 'Masuk untuk memproses pesanan dan transaksi toko' : 'Akses dashboard pengelolaan toko' }}</p>
+                <h3 class="fw-bold mt-2 mb-2" style="color: #333;">{{ $judul }}</h3>
+                <p class="text-muted mb-0">{{ $subjudul }}</p>
             </div>
             
             <!-- Messages -->
@@ -386,8 +393,8 @@
             <!-- Login Form -->
             <form method="POST" action="{{ route('login') }}" id="loginForm" novalidate>
                 @csrf
-                @if($isKasir)
-                    <input type="hidden" name="sebagai" value="kasir">
+                @if($sebagai)
+                    <input type="hidden" name="sebagai" value="{{ $sebagai }}">
                 @endif
                 
                 <!-- Email Input -->
@@ -437,16 +444,18 @@
                 
                 <!-- Login Button -->
                 <button type="submit" class="btn btn-login" id="loginButton">
-                    <i class="bi bi-box-arrow-in-right me-2"></i>{{ $isKasir ? 'Masuk sebagai Kasir' : 'Login ke Dashboard' }}
+                    <i class="bi bi-box-arrow-in-right me-2"></i>{{ $sebagai ? 'Masuk sebagai ' . ucfirst($sebagai) : 'Login ke Dashboard' }}
                 </button>
                 
                 <!-- Footer Links -->
                 <div class="login-footer">
+                    @if($sebagai !== 'kurir')
                     <div class="text-center mb-2">
-                        <p class="mb-2">Belum punya akun {{ $isKasir ? 'kasir' : 'pengelola' }}? 
+                        <p class="mb-2">Belum punya akun {{ $sebagai ?? 'pengelola' }}? 
                             <a href="{{ route('register') }}" class="register-link fw-medium">Daftar disini</a>
                         </p>
                     </div>
+                    @endif
                     <div class="text-center">
                         <a href="{{ route('welcome') }}" class="back-link">
                             <i class="bi bi-arrow-left me-1"></i>Kembali ke landing page
