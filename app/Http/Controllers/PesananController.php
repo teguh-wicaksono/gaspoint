@@ -68,19 +68,24 @@ class PesananController extends Controller
     // ===============================
     public function store(Request $request)
     {
+        // Tanpa pilihan metode (form lama) dianggap diantar, seperti sebelumnya.
+        $request->mergeIfMissing(['metode' => 'antar']);
+
+        // Beli langsung: data pembeli opsional. Diantar: nama, HP, dan alamat wajib.
         $validated = $request->validate([
-            'nama_pembeli'       => 'required|string|max:100',
-            'no_hp'              => ['required', 'string', 'max:20', 'regex:/^[0-9+\-\s]{8,20}$/'],
-            'alamat'             => 'required|string|max:500',
+            'metode'             => 'required|in:antar,langsung',
+            'nama_pembeli'       => 'required_if:metode,antar|nullable|string|max:100',
+            'no_hp'              => ['required_if:metode,antar', 'nullable', 'string', 'max:20', 'regex:/^[0-9+\-\s]{8,20}$/'],
+            'alamat'             => 'required_if:metode,antar|nullable|string|max:500',
             'tanggal'            => 'required|date',
             'items'              => 'required|array|min:1',
             'items.*.id_barang'  => 'required|integer|exists:barang,id_barang',
             'items.*.jumlah'     => 'required|integer|min:1|max:9999',
         ], [
-            'nama_pembeli.required'      => 'Nama pembeli wajib diisi.',
-            'no_hp.required'             => 'Nomor HP wajib diisi.',
+            'nama_pembeli.required_if'   => 'Nama pembeli wajib diisi.',
+            'no_hp.required_if'          => 'Nomor HP wajib diisi.',
             'no_hp.regex'                => 'Nomor HP hanya boleh berisi angka, spasi, tanda + dan -, minimal 8 karakter.',
-            'alamat.required'            => 'Alamat wajib diisi.',
+            'alamat.required_if'         => 'Alamat wajib diisi.',
             'tanggal.required'           => 'Tanggal wajib diisi.',
             'tanggal.date'               => 'Format tanggal tidak valid.',
             'items.required'             => 'Tambahkan minimal satu barang.',
@@ -117,13 +122,17 @@ class PesananController extends Controller
                 throw ValidationException::withMessages($errors);
             }
 
+            $antar = $validated['metode'] === 'antar';
+
             $pesanan = Pesanan::create([
-                'nama_pembeli' => $validated['nama_pembeli'],
-                'no_hp'        => $validated['no_hp'],
-                'alamat'       => $validated['alamat'],
+                'nama_pembeli' => $validated['nama_pembeli'] ?? 'Pembeli langsung',
+                'no_hp'        => $validated['no_hp'] ?? '-',
+                'alamat'       => $antar ? $validated['alamat'] : '-',
+                'metode'       => $validated['metode'],
                 'tanggal'      => $validated['tanggal'],
                 'total_harga'  => 0,
-                'status'       => 'pending',
+                // Beli langsung sudah dibayar dan dibawa pulang, jadi langsung selesai.
+                'status'       => $antar ? 'pending' : 'selesai',
             ]);
 
             $total = 0;

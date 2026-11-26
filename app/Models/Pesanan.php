@@ -9,8 +9,14 @@ class Pesanan extends Model
 {
     protected $table = 'pesanan';
     protected $primaryKey = 'id_pesanan';
-    protected $fillable = ['nama_pembeli', 'no_hp', 'alamat', 'tanggal', 'total_harga', 'status'];
+    protected $fillable = ['nama_pembeli', 'no_hp', 'alamat', 'metode', 'tanggal', 'total_harga', 'status'];
     protected $casts = ['tanggal' => 'date'];
+
+    /** Hanya pesanan yang diantar kurir (bukan beli langsung di toko). */
+    public function scopeAntar($query)
+    {
+        return $query->where('metode', 'antar');
+    }
 
     public function detail(): HasMany
     {

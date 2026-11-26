@@ -365,6 +365,18 @@
                 </a>
             </li>
 
+            @if(Auth::user()?->hasRole('kurir'))
+                <li class="nav-title">Pengantaran</li>
+
+                <!-- Rute Pengantaran -->
+                <li class="nav-item">
+                    <a class="nav-link {{ Request::routeIs('kurir.rute') ? 'active' : '' }}"
+                       href="{{ route('kurir.rute') }}">
+                        <i class="nav-icon fas fa-map-marked-alt me-2"></i><span class="nav-label">Rute Pengantaran</span>
+                    </a>
+                </li>
+            @endif
+
             <li class="nav-title">Transaksi</li>
 
             <!-- Halaman Kasir (POS) -->

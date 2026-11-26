@@ -26,6 +26,7 @@
             <div class="col-md-6">
                 <dl class="row mb-0">
                     <dt class="col-sm-4">Alamat</dt><dd class="col-sm-8">{{ $pesanan->alamat }}</dd>
+                    <dt class="col-sm-4">Metode</dt><dd class="col-sm-8">{{ $pesanan->metode === 'antar' ? 'Diantar kurir' : 'Beli langsung' }}</dd>
                 </dl>
             </div>
         </div>

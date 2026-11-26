@@ -69,4 +69,62 @@ class KurirPageTest extends TestCase
         $this->post(route('pesanan.status', $pesanan));
         $this->assertSame('selesai', $pesanan->fresh()->status);
     }
+
+    public function test_rute_page_lists_orders_being_delivered_with_maps_link(): void
+    {
+        $this->pesanan('diproses');
+        $this->pesanan('pending', 'Sari');
+
+        $kurir = $this->user(User::ROLE_KURIR);
+
+        $this->actingAs($kurir)->get(route('kurir.rute'))
+            ->assertOk()
+            ->assertSee('Budi')
+            ->assertDontSee('Sari')
+            ->assertSee('google.com/maps/dir', false);
+
+        $this->actingAs($kurir)->get(route('dashboard'))->assertSee(route('kurir.rute'), false);
+    }
+
+    public function test_kasir_cannot_open_rute_page(): void
+    {
+        $this->actingAs($this->user(User::ROLE_KASIR))->get(route('kurir.rute'))->assertForbidden();
+    }
+
+    private function barang(): \App\Models\Barang
+    {
+        return \App\Models\Barang::create(['nama_barang' => 'Gas 3 kg', 'jenis' => 'gas', 'harga' => 22000, 'stok' => 10]);
+    }
+
+    public function test_antar_order_from_kasir_goes_to_kurir_queue_and_needs_address(): void
+    {
+        $gas = $this->barang();
+        $kasir = $this->user(User::ROLE_KASIR);
+        $data = ['metode' => 'antar', 'nama_pembeli' => 'Budi', 'no_hp' => '081234567890', 'tanggal' => now()->toDateString(),
+                 'items' => [['id_barang' => $gas->id_barang, 'jumlah' => 1]]];
+
+        $this->actingAs($kasir)->post(route('pesanan.store'), $data)->assertSessionHasErrors('alamat');
+
+        $this->actingAs($kasir)->post(route('pesanan.store'), $data + ['alamat' => 'Jl. Mawar 1']);
+        $this->assertSame('pending', Pesanan::firstOrFail()->status);
+
+        $this->actingAs($this->user(User::ROLE_KURIR))->get(route('dashboard'))->assertSee('Jl. Mawar 1');
+    }
+
+    public function test_langsung_order_is_completed_at_once_and_skips_kurir(): void
+    {
+        $gas = $this->barang();
+
+        $this->actingAs($this->user(User::ROLE_KASIR))->post(route('pesanan.store'), [
+            'metode' => 'langsung', 'tanggal' => now()->toDateString(),
+            'items' => [['id_barang' => $gas->id_barang, 'jumlah' => 2]],
+        ])->assertSessionHasNoErrors();
+
+        $pesanan = Pesanan::firstOrFail();
+        $this->assertSame('selesai', $pesanan->status);
+        $this->assertSame('langsung', $pesanan->metode);
+        $this->assertSame(8, $gas->fresh()->stok);
+
+        $this->actingAs($this->user(User::ROLE_KURIR))->get(route('dashboard'))->assertDontSee('Pembeli langsung');
+    }
 }

@@ -28,6 +28,7 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/kasir', [KasirController::class, 'index'])->middleware('role:kasir,pengelola')->name('kasir.index');
+    Route::get('/kurir/rute', [DashboardController::class, 'rute'])->middleware('role:kurir,pengelola')->name('kurir.rute');
     Route::prefix('dashboard')->name('dashboard.')->controller(DashboardController::class)->group(function () {
         Route::get('/notifications', 'notifications')->name('notifications');
         Route::post('/notifications/{notificationId}/read', 'markAsRead')->name('notifications.read');
