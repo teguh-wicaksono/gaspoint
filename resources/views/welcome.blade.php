@@ -18,6 +18,7 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #f8f9fc 0%, #e3e6f0 100%);
             min-height: 100vh;
+            min-width: 320px;
         }
         
         .hero-section {
