@@ -5,13 +5,13 @@
 @section('content')
 @php
     $kode = str_pad($pesanan->id_pesanan, 4, '0', STR_PAD_LEFT);
-    $badge = $pesanan->status === 'selesai' ? 'bg-success' : ($pesanan->status === 'diproses' ? 'bg-warning text-dark' : 'bg-secondary');
+    $badge = $pesanan->menunggu_persetujuan ? 'bg-danger' : ($pesanan->status === 'selesai' ? 'bg-success' : ($pesanan->status === 'diproses' ? 'bg-warning text-dark' : 'bg-secondary'));
 @endphp
 
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
         <strong>Pesanan #{{ $kode }}</strong>
-        <span class="badge {{ $badge }}">{{ ucfirst($pesanan->status) }}</span>
+        <span class="badge {{ $badge }}">{{ $pesanan->menunggu_persetujuan ? 'Menunggu persetujuan' : ucfirst($pesanan->status) }}</span>
     </div>
 
     <div class="card-body">
@@ -27,6 +27,7 @@
                 <dl class="row mb-0">
                     <dt class="col-sm-4">Alamat</dt><dd class="col-sm-8">{{ $pesanan->alamat }}</dd>
                     <dt class="col-sm-4">Metode</dt><dd class="col-sm-8">{{ $pesanan->metode === 'antar' ? 'Diantar kurir' : 'Beli langsung' }}</dd>
+                    <dt class="col-sm-4">Pembayaran</dt><dd class="col-sm-8">{{ $pesanan->pembayaran_label }}</dd>
                 </dl>
             </div>
         </div>
@@ -67,7 +68,14 @@
         <div class="d-flex flex-wrap gap-2">
             <a href="{{ route('pesanan.index') }}" class="btn btn-secondary">Kembali</a>
 
-            @if ($nextStatus)
+            @if ($pesanan->menunggu_persetujuan)
+                @if (auth()->user()->hasRole('kasir', 'pengelola'))
+                    <form method="POST" action="{{ route('pesanan.setujui', $pesanan) }}">
+                        @csrf
+                        <button class="btn btn-success">Setujui &amp; teruskan ke kurir</button>
+                    </form>
+                @endif
+            @elseif ($nextStatus)
                 <form method="POST" action="{{ route('pesanan.status', $pesanan) }}">
                     @csrf
                     <button class="btn btn-success">
@@ -81,7 +89,7 @@
                       onsubmit="return confirm('Batalkan pesanan #{{ $kode }}? Stok barang akan dikembalikan.')">
                     @csrf
                     @method('DELETE')
-                    <button class="btn btn-outline-danger">Batalkan pesanan</button>
+                    <button class="btn btn-outline-danger">{{ $pesanan->menunggu_persetujuan ? 'Tolak pesanan' : 'Batalkan pesanan' }}</button>
                 </form>
             @endif
         </div>

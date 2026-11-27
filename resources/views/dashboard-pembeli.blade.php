@@ -24,11 +24,20 @@
 @endpush
 
 @section('content')
+<div class="d-flex flex-wrap gap-2 mb-3">
+    <a href="{{ url()->previous(route('welcome')) }}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-2"></i>Kembali
+    </a>
+    <a href="{{ route('welcome') }}" class="btn btn-outline-primary">
+        <i class="fas fa-home me-2"></i>Kembali ke Loading Page
+    </a>
+</div>
+
 <div class="pembeli-hero p-4 p-lg-5 mb-4">
     <div class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3">
         <div>
             <div class="small text-white-50 text-uppercase fw-semibold mb-2">Panel Pembeli</div>
-            <h1 class="h2 fw-bold mb-2">Selamat datang, {{ Auth::user()->name }}!</h1>
+            <h1 class="h2 fw-bold mb-2">Selamat datang, {{ Auth::user()?->name ?? 'Pembeli' }}!</h1>
             <p class="mb-0 text-white-50">Pesan gas dan galon dengan mudah dan cepat.</p>
         </div>
         <div class="d-flex gap-2 flex-wrap">

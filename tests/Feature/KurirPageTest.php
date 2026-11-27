@@ -116,7 +116,7 @@ class KurirPageTest extends TestCase
         $gas = $this->barang();
 
         $this->actingAs($this->user(User::ROLE_KASIR))->post(route('pesanan.store'), [
-            'metode' => 'langsung', 'tanggal' => now()->toDateString(),
+            'metode' => 'langsung', 'pembayaran' => 'cash', 'tanggal' => now()->toDateString(),
             'items' => [['id_barang' => $gas->id_barang, 'jumlah' => 2]],
         ])->assertSessionHasNoErrors();
 

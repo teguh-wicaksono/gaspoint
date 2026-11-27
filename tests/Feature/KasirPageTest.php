@@ -50,20 +50,49 @@ class KasirPageTest extends TestCase
             ->assertRedirect(route('dashboard'));
     }
 
-    public function test_order_from_kasir_page_returns_to_kasir_page(): void
+    public function test_kasir_page_has_cash_qris_and_no_antar_or_langsung_choice(): void
+    {
+        $this->actingAs($this->user(User::ROLE_KASIR))->get(route('kasir.index'))
+            ->assertOk()
+            ->assertSee('value="cash"', false)
+            ->assertSee('value="qris"', false)
+            ->assertSee('<input type="hidden" name="metode" value="langsung">', false)
+            ->assertDontSee('metode-antar', false)
+            ->assertDontSee('Beli langsung')
+            ->assertDontSee('name="alamat"', false);
+    }
+
+    public function test_order_from_kasir_page_is_completed_at_once_and_returns_to_kasir_page(): void
     {
         $gas = Barang::create(['nama_barang' => 'Gas 3 kg', 'jenis' => 'gas', 'harga' => 22000, 'stok' => 5]);
 
         $this->actingAs($this->user(User::ROLE_KASIR))->post(route('pesanan.store'), [
-            'dari'         => 'kasir',
-            'nama_pembeli' => 'Budi',
-            'no_hp'        => '081234567890',
-            'alamat'       => 'Jl. Mawar 1',
-            'tanggal'      => now()->toDateString(),
-            'items'        => [['id_barang' => $gas->id_barang, 'jumlah' => 2]],
+            'dari'       => 'kasir',
+            'metode'     => 'langsung',
+            'pembayaran' => 'qris',
+            'tanggal'    => now()->toDateString(),
+            'items'      => [['id_barang' => $gas->id_barang, 'jumlah' => 2]],
         ])->assertRedirect(route('kasir.index'))->assertSessionHas('success');
 
-        $this->assertSame(44000, Pesanan::firstOrFail()->total_harga);
+        $pesanan = Pesanan::firstOrFail();
+        $this->assertSame(44000, $pesanan->total_harga);
+        $this->assertSame('qris', $pesanan->pembayaran);
+        $this->assertSame('selesai', $pesanan->status);
+        $this->assertFalse($pesanan->menunggu_persetujuan);
         $this->assertSame(3, $gas->fresh()->stok);
+    }
+
+    public function test_kasir_order_requires_cash_or_qris(): void
+    {
+        $gas = Barang::create(['nama_barang' => 'Gas 3 kg', 'jenis' => 'gas', 'harga' => 22000, 'stok' => 5]);
+        $kasir = $this->actingAs($this->user(User::ROLE_KASIR));
+        $data = ['dari' => 'kasir', 'metode' => 'langsung', 'tanggal' => now()->toDateString(),
+                 'items' => [['id_barang' => $gas->id_barang, 'jumlah' => 1]]];
+
+        $kasir->post(route('pesanan.store'), $data)->assertSessionHasErrors('pembayaran');
+        $kasir->post(route('pesanan.store'), $data + ['pembayaran' => 'cod'])->assertSessionHasErrors('pembayaran');
+
+        $this->assertSame(0, Pesanan::count());
+        $this->assertSame(5, $gas->fresh()->stok);
     }
 }

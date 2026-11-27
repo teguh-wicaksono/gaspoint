@@ -100,6 +100,10 @@
         .icon-pedagang {
             background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
         }
+
+        .icon-pembeli {
+            background: linear-gradient(135deg, #1a3a5c 0%, #2980b9 100%);
+        }
         
         .btn-kurir {
             background: #e67e22;
@@ -128,6 +132,21 @@
         }
         
         .btn-pedagang:hover {
+            transform: scale(1.05);
+            color: white;
+        }
+
+        .btn-pembeli {
+            background: linear-gradient(135deg, #1a3a5c 0%, #2980b9 100%);
+            border: none;
+            padding: 12px 30px;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s;
+            color: white;
+        }
+
+        .btn-pembeli:hover {
             transform: scale(1.05);
             color: white;
         }
@@ -339,7 +358,7 @@
         
         <div class="row justify-content-center g-4">
             <!-- Kurir -->
-            <div class="col-md-6 col-lg-5">
+            <div class="col-md-6 col-lg-4">
                 <div class="card card-option">
                     <div class="card-body text-center p-5">
                         <div class="card-icon icon-kurir">
@@ -372,7 +391,7 @@
             </div>
 
             <!-- Pengelola -->
-            <div class="col-md-6 col-lg-5">
+            <div class="col-md-6 col-lg-4">
                 <div class="card card-option">
                     <div class="card-body text-center p-5">
                         <div class="card-icon icon-pedagang">
@@ -401,6 +420,25 @@
                             <i class="bi bi-shield-lock me-1"></i>
                             Hanya pengelola toko yang terdaftar
                         </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pembeli -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card card-option">
+                    <div class="card-body text-center p-5">
+                        <div class="card-icon icon-pembeli">
+                            <i class="bi bi-person"></i>
+                        </div>
+                        <h3 class="card-title fw-bold mb-3">Masuk sebagai Pembeli</h3>
+                        <p class="card-text text-muted mb-4">
+                            Pesan gas dan galon lewat formulir tanpa perlu login. Bayar COD, transfer, atau QRIS; pesanan diperiksa kasir lalu diantar kurir.
+                        </p>
+
+                        <a href="{{ route('dashboard.pembeli') }}" class="btn btn-pembeli btn-lg w-100">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>Masuk sebagai Pembeli
+                        </a>
                     </div>
                 </div>
             </div>

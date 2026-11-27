@@ -61,7 +61,13 @@
                             <td>{{ $row->tanggal->format('d/m/Y') }}</td>
                             <td class="text-center">{{ $row->detail_count }}</td>
                             <td class="text-end">Rp {{ number_format($row->total_harga, 0, ',', '.') }}</td>
-                            <td><span class="badge {{ $badge($row->status) }}">{{ ucfirst($row->status) }}</span></td>
+                            <td>
+                                @if ($row->menunggu_persetujuan)
+                                    <span class="badge bg-danger">Menunggu persetujuan</span>
+                                @else
+                                    <span class="badge {{ $badge($row->status) }}">{{ ucfirst($row->status) }}</span>
+                                @endif
+                            </td>
                             <td class="text-center">
                                 <a href="{{ route('pesanan.show', $row) }}" class="btn btn-outline-primary btn-sm">Detail</a>
                             </td>
