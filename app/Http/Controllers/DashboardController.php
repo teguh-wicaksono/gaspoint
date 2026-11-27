@@ -23,7 +23,7 @@ class DashboardController extends Controller
         $user = Auth::user();
 
         if ($user->role === 'pembeli') {
-            return view('dashboard-pembeli');
+            return redirect()->route('dashboard.pembeli');
         }
 
         if ($user->role === 'kurir') {
@@ -36,7 +36,7 @@ class DashboardController extends Controller
     // Antrean pengantaran dipakai bersama semua kurir (pesanan belum punya kolom kurir).
     private function getKurirData()
     {
-        $aktif = Pesanan::antar()->with('detail.barang')
+        $aktif = Pesanan::untukKurir()->with('detail.barang')
             ->whereIn('status', ['pending', 'diproses'])
             ->orderBy('tanggal')
             ->orderBy('id_pesanan')
@@ -58,7 +58,7 @@ class DashboardController extends Controller
     public function rute()
     {
         // shortcut: Google Maps hanya menerima 9 waypoint + 1 tujuan, naikkan ke Directions API bila perlu lebih.
-        $stops = Pesanan::antar()->where('status', 'diproses')
+        $stops = Pesanan::untukKurir()->where('status', 'diproses')
             ->orderBy('tanggal')->orderBy('id_pesanan')
             ->limit(10)->get();
 

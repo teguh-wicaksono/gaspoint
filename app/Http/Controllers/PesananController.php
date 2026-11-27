@@ -5,11 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Barang;
 use App\Models\Notifikasi;
 use App\Models\Pesanan;
-use App\Models\PesananDetail;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\ValidationException;
 
 class PesananController extends Controller
 {
@@ -71,9 +69,13 @@ class PesananController extends Controller
         // Tanpa pilihan metode (form lama) dianggap diantar, seperti sebelumnya.
         $request->mergeIfMissing(['metode' => 'antar']);
 
-        // Beli langsung: data pembeli opsional. Diantar: nama, HP, dan alamat wajib.
+        // Beli langsung (di toko): data pembeli opsional, pembayaran wajib cash/QRIS.
+        // Diantar (buatan staf): nama, HP, dan alamat wajib; pembayaran boleh kosong.
+        $pembayaran = $request->input('metode') === 'langsung' ? 'required|in:cash,qris' : 'nullable|in:cod,transfer,qris';
+
         $validated = $request->validate([
             'metode'             => 'required|in:antar,langsung',
+            'pembayaran'         => $pembayaran,
             'nama_pembeli'       => 'required_if:metode,antar|nullable|string|max:100',
             'no_hp'              => ['required_if:metode,antar', 'nullable', 'string', 'max:20', 'regex:/^[0-9+\-\s]{8,20}$/'],
             'alamat'             => 'required_if:metode,antar|nullable|string|max:500',
@@ -86,6 +88,8 @@ class PesananController extends Controller
             'no_hp.required_if'          => 'Nomor HP wajib diisi.',
             'no_hp.regex'                => 'Nomor HP hanya boleh berisi angka, spasi, tanda + dan -, minimal 8 karakter.',
             'alamat.required_if'         => 'Alamat wajib diisi.',
+            'pembayaran.required'        => 'Pilih metode pembayaran (cash atau QRIS).',
+            'pembayaran.in'              => 'Metode pembayaran tidak valid.',
             'tanggal.required'           => 'Tanggal wajib diisi.',
             'tanggal.date'               => 'Format tanggal tidak valid.',
             'items.required'             => 'Tambahkan minimal satu barang.',
@@ -97,72 +101,24 @@ class PesananController extends Controller
             'items.*.jumlah.min'         => 'Jumlah minimal 1.',
         ]);
 
-        // Gabungkan baris dengan barang yang sama supaya pengecekan stok akurat.
-        $lines = collect($validated['items'])
-            ->groupBy('id_barang')
-            ->map(fn ($rows, $id) => ['id_barang' => (int) $id, 'jumlah' => (int) $rows->sum('jumlah')])
-            ->values();
+        $antar = $validated['metode'] === 'antar';
 
-        $pesanan = DB::transaction(function () use ($validated, $lines) {
-            // Kunci semua barang yang dipakai agar stok tidak balapan antar transaksi.
-            $barangs = Barang::whereIn('id_barang', $lines->pluck('id_barang'))
-                ->lockForUpdate()
-                ->get()
-                ->keyBy('id_barang');
-
-            $errors = [];
-            foreach ($lines as $line) {
-                $barang = $barangs[$line['id_barang']];
-                if ($barang->stok < $line['jumlah']) {
-                    $errors['items'] = "Stok {$barang->nama_barang} hanya tersedia {$barang->stok} unit.";
-                    break;
-                }
-            }
-            if ($errors) {
-                throw ValidationException::withMessages($errors);
-            }
-
-            $antar = $validated['metode'] === 'antar';
-
-            $pesanan = Pesanan::create([
-                'nama_pembeli' => $validated['nama_pembeli'] ?? 'Pembeli langsung',
-                'no_hp'        => $validated['no_hp'] ?? '-',
-                'alamat'       => $antar ? $validated['alamat'] : '-',
-                'metode'       => $validated['metode'],
-                'tanggal'      => $validated['tanggal'],
-                'total_harga'  => 0,
-                // Beli langsung sudah dibayar dan dibawa pulang, jadi langsung selesai.
-                'status'       => $antar ? 'pending' : 'selesai',
-            ]);
-
-            $total = 0;
-            foreach ($lines as $line) {
-                $barang = $barangs[$line['id_barang']];
-                // Harga selalu diambil dari database, bukan dari input pengguna.
-                $subtotal = $barang->harga * $line['jumlah'];
-
-                PesananDetail::create([
-                    'id_pesanan' => $pesanan->id_pesanan,
-                    'id_barang'  => $barang->id_barang,
-                    'jumlah'     => $line['jumlah'],
-                    'harga'      => $barang->harga,
-                    'subtotal'   => $subtotal,
-                ]);
-
-                $barang->decrement('stok', $line['jumlah']);
-                $total += $subtotal;
-            }
-
-            $pesanan->update(['total_harga' => $total]);
-
-            return $pesanan;
-        });
+        $pesanan = Pesanan::buat([
+            'nama_pembeli' => $validated['nama_pembeli'] ?? 'Pembeli langsung',
+            'no_hp'        => $validated['no_hp'] ?? '-',
+            'alamat'       => $antar ? $validated['alamat'] : '-',
+            'metode'       => $validated['metode'],
+            'pembayaran'   => $validated['pembayaran'] ?? null,
+            'tanggal'      => $validated['tanggal'],
+            // Beli langsung sudah dibayar dan dibawa pulang, jadi langsung selesai.
+            'status'       => $antar ? 'pending' : 'selesai',
+        ], $validated['items']);
 
         $this->notify($pesanan, 'Pesanan baru #' . $this->kode($pesanan) . ' dari ' . $pesanan->nama_pembeli);
 
         if ($request->input('dari') === 'kasir') {
             return redirect()->route('kasir.index')
-                ->with('success', 'Pesanan #' . $this->kode($pesanan) . ' berhasil dibuat. Total Rp ' . number_format($pesanan->total_harga, 0, ',', '.'));
+                ->with('success', 'Pesanan #' . $this->kode($pesanan) . ' berhasil dibuat (' . $pesanan->pembayaran_label . '). Total Rp ' . number_format($pesanan->total_harga, 0, ',', '.'));
         }
 
         return redirect()->route('pesanan.show', $pesanan)
@@ -187,6 +143,10 @@ class PesananController extends Controller
     // ===============================
     public function updateStatus(Pesanan $pesanan)
     {
+        if ($pesanan->menunggu_persetujuan) {
+            return back()->with('error', 'Pesanan online ini belum disetujui kasir.');
+        }
+
         $next = self::NEXT_STATUS[$pesanan->status] ?? null;
 
         if ($next === null) {
@@ -198,6 +158,22 @@ class PesananController extends Controller
         $this->notify($pesanan, 'Pesanan #' . $this->kode($pesanan) . " berstatus {$next}");
 
         return back()->with('success', "Status pesanan diubah menjadi {$next}.");
+    }
+
+    // ===============================
+    // SETUJUI: kasir menyetujui pesanan online, lalu masuk antrean kurir
+    // ===============================
+    public function setujui(Pesanan $pesanan)
+    {
+        if (! $pesanan->menunggu_persetujuan) {
+            return back()->with('error', 'Pesanan ini tidak sedang menunggu persetujuan.');
+        }
+
+        $pesanan->update(['menunggu_persetujuan' => false]);
+
+        $this->notify($pesanan, 'Pesanan #' . $this->kode($pesanan) . ' disetujui, diteruskan ke kurir');
+
+        return back()->with('success', 'Pesanan #' . $this->kode($pesanan) . ' disetujui dan diteruskan ke kurir.');
     }
 
     // ===============================

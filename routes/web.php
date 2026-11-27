@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BarangController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\KasirController;
+use App\Http\Controllers\PembeliController;
 use App\Http\Controllers\PesananController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StokKeluarController;
@@ -13,7 +14,8 @@ use Illuminate\Support\Facades\Route;
 
 // Public: landing page portal pengelola
 Route::get('/', [AuthController::class, 'welcome'])->name('welcome');
-Route::view('/dashboard/pembeli', 'dashboard-pembeli')->name('dashboard.pembeli');
+Route::get('/dashboard/pembeli', [PembeliController::class, 'index'])->name('dashboard.pembeli');
+Route::post('/dashboard/pembeli', [PembeliController::class, 'store'])->middleware('throttle:10,1')->name('pembeli.store');
 
 // Guest only: login
 Route::middleware('guest')->controller(AuthController::class)->group(function () {
@@ -26,7 +28,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    Route::get('/kasir', [KasirController::class, 'index'])->middleware('role:kasir,pengelola')->name('kasir.index');
+    Route::middleware('role:kasir,pengelola')->prefix('kasir')->name('kasir.')->controller(KasirController::class)->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('/online', 'online')->name('online');
+    });
     Route::get('/kurir/rute', [DashboardController::class, 'rute'])->middleware('role:kurir,pengelola')->name('kurir.rute');
     Route::prefix('dashboard')->name('dashboard.')->controller(DashboardController::class)->group(function () {
         Route::get('/notifications', 'notifications')->name('notifications');
@@ -50,6 +55,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/', 'store')->name('store');
         Route::get('/{pesanan}', 'show')->name('show');
         Route::post('/{pesanan}/status', 'updateStatus')->name('status');
+        Route::post('/{pesanan}/setujui', 'setujui')->middleware('role:kasir,pengelola')->name('setujui');
         Route::delete('/{pesanan}', 'destroy')->name('destroy');
     });
 

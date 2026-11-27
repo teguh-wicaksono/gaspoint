@@ -37,6 +37,8 @@
     </div>
 </div>
 
+<div id="antrean-online" data-url="{{ route('kasir.online') }}">@include('kasir._online')</div>
+
 <div class="row g-3">
     {{-- Kiri: pilih barang --}}
     <div class="col-lg-7">
@@ -95,23 +97,25 @@
                         <span class="fs-4 fw-bold text-success" id="total">Rp 0</span>
                     </div>
 
-                    <div class="btn-group w-100 mb-3" role="group" aria-label="Metode pembelian">
-                        <input type="radio" class="btn-check" name="metode" id="metode-antar" value="antar" @checked(old('metode', 'antar') === 'antar')>
-                        <label class="btn btn-outline-warning" for="metode-antar"><i class="fas fa-truck me-1"></i> Antar</label>
-                        <input type="radio" class="btn-check" name="metode" id="metode-langsung" value="langsung" @checked(old('metode') === 'langsung')>
-                        <label class="btn btn-outline-success" for="metode-langsung"><i class="fas fa-store me-1"></i> Beli langsung</label>
+                    {{-- Kasir = beli di tempat, jadi selalu "langsung"; yang dipilih hanya cara bayar. --}}
+                    <input type="hidden" name="metode" value="langsung">
+                    <div class="btn-group w-100 mb-3" role="group" aria-label="Metode pembayaran">
+                        <input type="radio" class="btn-check" name="pembayaran" id="bayar-cash" value="cash" @checked(old('pembayaran', 'cash') === 'cash')>
+                        <label class="btn btn-outline-success" for="bayar-cash"><i class="fas fa-money-bill-wave me-1"></i> Cash</label>
+                        <input type="radio" class="btn-check" name="pembayaran" id="bayar-qris" value="qris" @checked(old('pembayaran') === 'qris')>
+                        <label class="btn btn-outline-primary" for="bayar-qris"><i class="fas fa-qrcode me-1"></i> QRIS</label>
                     </div>
 
                     <div class="mb-2">
-                        <label class="form-label small mb-1" for="nama_pembeli">Nama pembeli</label>
+                        <label class="form-label small mb-1" for="nama_pembeli">Nama pembeli (opsional)</label>
                         <input type="text" id="nama_pembeli" name="nama_pembeli" value="{{ old('nama_pembeli') }}"
-                               class="form-control" maxlength="100" required>
+                               class="form-control" maxlength="100">
                     </div>
                     <div class="row g-2 mb-2">
                         <div class="col-6">
-                            <label class="form-label small mb-1" for="no_hp">No. HP</label>
+                            <label class="form-label small mb-1" for="no_hp">No. HP (opsional)</label>
                             <input type="text" id="no_hp" name="no_hp" value="{{ old('no_hp') }}"
-                                   class="form-control" maxlength="20" required>
+                                   class="form-control" maxlength="20">
                         </div>
                         <div class="col-6">
                             <label class="form-label small mb-1" for="tanggal">Tanggal</label>
@@ -119,14 +123,9 @@
                                    class="form-control" required>
                         </div>
                     </div>
-                    <div class="mb-3" id="wrap-alamat">
-                        <label class="form-label small mb-1" for="alamat">Alamat pengantaran</label>
-                        <textarea id="alamat" name="alamat" rows="2" class="form-control" maxlength="500" required>{{ old('alamat') }}</textarea>
-                    </div>
-
                     <div class="d-flex gap-2">
                         <button type="submit" class="btn btn-success flex-grow-1" id="btn-simpan" disabled>
-                            <i class="fas fa-check me-1"></i> <span id="teks-simpan">Simpan Pesanan</span>
+                            <i class="fas fa-check me-1"></i> Selesaikan Pembelian
                         </button>
                         <button type="button" class="btn btn-outline-secondary" id="btn-kosongkan" title="Kosongkan keranjang">
                             <i class="fas fa-trash"></i>
@@ -147,7 +146,7 @@
                         <span class="small">
                             Rp {{ number_format($p->total_harga, 0, ',', '.') }}
                             <span class="badge {{ $p->metode === 'antar' ? 'bg-warning text-dark' : 'bg-success' }} ms-1">{{ $p->metode === 'antar' ? 'Antar' : 'Langsung' }}</span>
-                            <span class="badge bg-secondary ms-1">{{ $p->status }}</span>
+                            <span class="badge {{ $p->menunggu_persetujuan ? 'bg-danger' : 'bg-secondary' }} ms-1">{{ $p->menunggu_persetujuan ? 'menunggu persetujuan' : $p->status }}</span>
                         </span>
                     </li>
                 @empty
@@ -265,16 +264,21 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!Object.keys(cart).length) e.preventDefault();
     });
 
-    // Antar: nama, HP, alamat wajib. Beli langsung: data pembeli opsional, pesanan langsung selesai.
-    function aturMetode() {
-        const langsung = document.querySelector('input[name=metode]:checked').value === 'langsung';
-        $('wrap-alamat').classList.toggle('d-none', langsung);
-        ['alamat', 'nama_pembeli', 'no_hp'].forEach(id => { $(id).required = !langsung; });
-        ['nama_pembeli', 'no_hp'].forEach(id => { $(id).placeholder = langsung ? 'Opsional' : ''; });
-        $('teks-simpan').textContent = langsung ? 'Selesaikan Pembelian' : 'Simpan Pesanan';
-    }
-    document.querySelectorAll('input[name=metode]').forEach(r => r.addEventListener('change', aturMetode));
-    aturMetode();
+    // Segarkan daftar pesanan online tiap 20 detik; keranjang di sebelah kanan tidak ikut berubah.
+    const antrean = $('antrean-online');
+    const idsDari = el => (el && el.firstElementChild && el.firstElementChild.dataset.ids) || '';
+    setInterval(() => {
+        if (document.hidden) return;
+        fetch(antrean.dataset.url, { headers: { 'X-Requested-With': 'XMLHttpRequest' }, credentials: 'same-origin' })
+            .then(r => (r.ok && !r.redirected ? r.text() : null))
+            .then(html => {
+                if (html === null) return;
+                const t = document.createElement('template');
+                t.innerHTML = html.trim();
+                if (idsDari(t.content) !== idsDari(antrean)) antrean.innerHTML = html;
+            })
+            .catch(() => {});
+    }, 20000);
 
     render();
 });

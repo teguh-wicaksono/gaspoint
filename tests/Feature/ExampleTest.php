@@ -21,13 +21,14 @@ class ExampleTest extends TestCase
             ->assertSee(route('dashboard.pembeli'), false);
     }
 
-    public function test_buyer_can_open_the_dashboard_without_logging_in(): void
+    public function test_buyer_sees_only_the_order_form_without_logging_in(): void
     {
         $this->get(route('dashboard.pembeli'))
             ->assertOk()
-            ->assertSee('Dashboard Pembeli')
-            ->assertSee('Selamat datang, Pembeli!')
-            ->assertSee('Kembali ke Loading Page')
+            ->assertSee('Pesan Gas &amp; Galon', false)
+            ->assertSee(route('pembeli.store'), false)
+            ->assertSee('name="pembayaran"', false)
+            ->assertDontSee('Riwayat Pesanan')
             ->assertSee(route('welcome'), false);
 
         $this->assertGuest();

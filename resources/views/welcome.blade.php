@@ -433,7 +433,7 @@
                         </div>
                         <h3 class="card-title fw-bold mb-3">Masuk sebagai Pembeli</h3>
                         <p class="card-text text-muted mb-4">
-                            Lihat katalog gas dan galon serta ringkasan dashboard pembeli tanpa perlu login.
+                            Pesan gas dan galon lewat formulir tanpa perlu login. Bayar COD, transfer, atau QRIS; pesanan diperiksa kasir lalu diantar kurir.
                         </p>
 
                         <a href="{{ route('dashboard.pembeli') }}" class="btn btn-pembeli btn-lg w-100">
